@@ -499,59 +499,89 @@ namespace Engine.Scenes {
 		}
 
 		public update(dt: number): void {
-			// Entrega de café aos clientes
+			// Interação com os clientes
 			if (Engine.Core.justPressed(Engine.Core.Action.Interact)) {
 				let carry = this.barista.getCarryType();
-				if (carry === Engine.Entities.CarryType.Espresso || carry === Engine.Entities.CarryType.V60 || carry === Engine.Entities.CarryType.Capsule) {
-					let baristaSprite = this.barista.sprite;
-					let closestCustomer: CustomerRecord = null;
-					let minDistance = 24;
+				let baristaSprite = this.barista.sprite;
+				let closestCustomer: CustomerRecord = null;
+				let minDistance = 24;
 
-					for (let i = 0; i < this.activeCustomers.length; i++) {
-						let c = this.activeCustomers[i];
-						if (c.sprite.vx === 0) {
-							let dist = Math.abs(baristaSprite.x - c.sprite.x);
-							if (dist < minDistance && baristaSprite.y < this.queueY + 36) {
-								minDistance = dist;
-								closestCustomer = c;
-							}
+				for (let i = 0; i < this.activeCustomers.length; i++) {
+					let c = this.activeCustomers[i];
+					if (c.sprite.vx === 0) { // Cliente já sentou
+						let dist = Math.abs(baristaSprite.x - c.sprite.x);
+						// Só checa colisão se o barista estiver perto da fila
+						if (dist < minDistance && baristaSprite.y < this.queueY + 36) {
+							minDistance = dist;
+							closestCustomer = c;
 						}
 					}
+				}
 
-					if (closestCustomer) {
+				if (closestCustomer) {
+					// 1. Mãos vazias: Conversa e pede o café
+					if (carry === Engine.Entities.CarryType.None) {
+						let txt = ["Oi...", "O clima ta bem frio la fora.", "Me da um cafe bem forte?"];
+						if (closestCustomer.desiredMethod === Engine.Entities.BrewMethod.V60) {
+							txt = ["Com licenca.", "Gostaria de um cafe coado bem suave.", "Demora muito?"];
+						}
+
+						Engine.Scenes.SceneStack.push(new Engine.Scenes.DialogScene(
+							Assets.portraitCustomerA,
+							txt,
+							() => {} // Callback vazio, apenas fecha o diálogo
+						));
+					} 
+					// 2. Entregando uma bebida
+					else if (carry === Engine.Entities.CarryType.Espresso || carry === Engine.Entities.CarryType.V60 || carry === Engine.Entities.CarryType.Capsule) {
 						let methodMatch = false;
 						if (closestCustomer.desiredMethod === Engine.Entities.BrewMethod.Espresso && carry === Engine.Entities.CarryType.Espresso) methodMatch = true;
 						else if (closestCustomer.desiredMethod === Engine.Entities.BrewMethod.V60 && carry === Engine.Entities.CarryType.V60) methodMatch = true;
 						else if (closestCustomer.desiredMethod === Engine.Entities.BrewMethod.Capsule && carry === Engine.Entities.CarryType.Capsule) methodMatch = true;
 
+						let gain = 0;
+						let txt = [];
+
 						if (methodMatch) {
-							let gain = 10 * closestCustomer.rewardMultiplier;
-							Engine.Core.TycoonState.money += gain;
-							
-							// Spawn Floating Combat Text (Juice)
-							this.floatingTexts.push({
-								text: "+$" + gain,
-								x: closestCustomer.sprite.x - 4,
-								y: closestCustomer.sprite.y - 15,
-								vy: -40,
-								life: 1000,
-								maxLife: 1000
-							});
-							
-							// Som clássico de "ba-ding"
-							music.playTone(523, 80);
-							music.playTone(659, 120);
-							
-							// Liberta o slot
-							if (closestCustomer.slotIndex >= 0 && closestCustomer.slotIndex < this.occupiedSlots.length) {
-								this.occupiedSlots[closestCustomer.slotIndex] = null;
-							}
-							
-							closestCustomer.sprite.destroy();
-							this.activeCustomers.removeElement(closestCustomer);
-							
-							this.barista.setCarryType(Engine.Entities.CarryType.None);
+							gain = 10 * closestCustomer.rewardMultiplier;
+							txt = ["Nossa, isso esta perfeito!", "Acertou em cheio. Muito obrigado!"];
+						} else {
+							gain = 2; // Errou, ganha mixaria
+							txt = ["Hmm... Isso nao parece o que eu pedi.", "Mas eu bebo mesmo assim.", "Ate mais."];
 						}
+
+						// Limpa as mãos
+						this.barista.setCarryType(Engine.Entities.CarryType.None);
+
+						// Abre cena de diálogo de reação, e no callback encerra o ciclo do cliente
+						Engine.Scenes.SceneStack.push(new Engine.Scenes.DialogScene(
+							Assets.portraitCustomerA,
+							txt,
+							() => {
+								Engine.Core.TycoonState.money += gain;
+								
+								// Spawn Floating Combat Text (Juice)
+								this.floatingTexts.push({
+									text: "+$" + gain,
+									x: closestCustomer.sprite.x - 4,
+									y: closestCustomer.sprite.y - 15,
+									vy: -40,
+									life: 1000,
+									maxLife: 1000
+								});
+								
+								music.playTone(523, 80);
+								music.playTone(659, 120);
+								
+								// Liberta o slot
+								if (closestCustomer.slotIndex >= 0 && closestCustomer.slotIndex < this.occupiedSlots.length) {
+									this.occupiedSlots[closestCustomer.slotIndex] = null;
+								}
+								
+								closestCustomer.sprite.destroy();
+								this.activeCustomers.removeElement(closestCustomer);
+							}
+						));
 					}
 				}
 			}

@@ -630,14 +630,14 @@ namespace Engine.Scenes {
 			cData.slotIndex = freeSlotIndex;
 
 			if (randint(0, 4) === 0) {
-				cData.paciencia = 40;
-				cData.pacienciaMax = 40;
+				cData.paciencia = 60; // Aumentado de 40 para 60 segundos
+				cData.pacienciaMax = 60;
 				cData.rewardMultiplier = 3;
 				cData.desiredBean = Engine.Entities.BeanType.Mantiqueira;
 				cData.desiredMethod = Engine.Entities.BrewMethod.V60;
 			} else {
-				cData.paciencia = 10;
-				cData.pacienciaMax = 10;
+				cData.paciencia = 30; // Aumentado de 10 para 30 segundos
+				cData.pacienciaMax = 30;
 				cData.rewardMultiplier = 1;
 				cData.desiredMethod = randint(0, 1) === 0 ? Engine.Entities.BrewMethod.Espresso : Engine.Entities.BrewMethod.Capsule;
 				cData.desiredBean = randint(0, 1) === 0 ? Engine.Entities.BeanType.Mantiqueira : Engine.Entities.BeanType.Colombia;

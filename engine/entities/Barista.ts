@@ -96,7 +96,8 @@ namespace Engine.Entities {
 					}
 				}
 				// Evita que o Barista passe por cima do balcão de baixo (y = screen.height - 24)
-				const maxWalkY = screen.height - 24;
+				// Subtraindo 8 pixels para levar em conta o centro do sprite (16x16)
+				const maxWalkY = screen.height - 32;
 				if (nextY > maxWalkY) {
 					this.sprite.y = maxWalkY;
 					if (vy > 0) {

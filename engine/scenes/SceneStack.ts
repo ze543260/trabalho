@@ -8,7 +8,7 @@ namespace Engine.Scenes {
 		/** Push a new scene, pausing the previous one. */
 		public static push(scene: Scene): void {
 			const current = this.top();
-			if (current && current.pause) {
+			if (current) {
 				current.pause();
 			}
 
@@ -24,7 +24,7 @@ namespace Engine.Scenes {
 			}
 
 			const next = this.top();
-			if (next && next.resume) {
+			if (next) {
 				next.resume();
 			}
 

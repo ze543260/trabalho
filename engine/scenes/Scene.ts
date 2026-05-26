@@ -6,7 +6,7 @@ namespace Engine.Scenes {
 		enter(): void;
 		update(dt: number): void;
 		exit(): void;
-		pause?(): void;
-		resume?(): void;
+		pause(): void;
+		resume(): void;
 	}
 }

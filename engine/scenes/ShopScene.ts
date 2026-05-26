@@ -78,6 +78,12 @@ namespace Engine.Scenes {
 			Engine.UI.UIManager.clear();
 		}
 
+		public pause(): void {
+		}
+
+		public resume(): void {
+		}
+
 		private moveFocus(direction: number): void {
 			if (this.buttonCount <= 0) {
 				return;

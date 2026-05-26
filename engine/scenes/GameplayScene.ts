@@ -127,6 +127,12 @@ namespace Engine.Scenes {
 			Engine.UI.UIManager.clear();
 		}
 
+		public pause(): void {
+		}
+
+		public resume(): void {
+		}
+
 		private updateSpawn(dt: number): void {
 			if (this.dayEnded) return;
 

@@ -71,11 +71,6 @@ namespace Engine.Scenes {
 				}
 			}
 
-			// Carimba o balcão logo acima do chão
-			for (let x = 0; x < screen.width; x += 16) {
-				bg.drawTransparentImage(Assets.counterTile, x, counterY - 24);
-			}
-
 			// Define essa imagem pintada como o fundo imutável da cena
 			scene.setBackgroundImage(bg);
 			// -----------------------------------------
@@ -97,9 +92,18 @@ namespace Engine.Scenes {
 			this.customerWardrobe.push(blueCustomer);
 			// -----------------------------------
 
+			// Cria os sprites do balcão para ordenação correta de Z
+			for (let x = 8; x < screen.width; x += 16) {
+				const counterSprite = sprites.create(Assets.counterTile, SpriteKind.Food);
+				counterSprite.x = x;
+				counterSprite.y = counterY - 16;
+				counterSprite.z = 5; // Por cima dos clientes (z=1) e por baixo do barista (z=10)
+			}
+
 			const baristaSprite = sprites.create(Assets.baristaBase, SpriteKind.Player);
 			baristaSprite.x = 24;
 			baristaSprite.y = screen.height - 16;
+			baristaSprite.z = 10; // Barista à frente do balcão
 			this.barista = new Engine.Entities.Barista(baristaSprite, 50, counterY);
 			Engine.Entities.EntityManager.add(this.barista);
 
@@ -107,6 +111,7 @@ namespace Engine.Scenes {
 			const espressoSprite = sprites.create(Assets.espresso, SpriteKind.Food);
 			espressoSprite.x = 64;
 			espressoSprite.y = counterY - 12;
+			espressoSprite.z = 8; // Máquina sobre o balcão
 			const espressoStation = new Engine.Entities.Station(espressoSprite, Engine.Entities.BrewMethod.Espresso);
 			this.stations.push(espressoStation);
 			Engine.Entities.EntityManager.add(espressoStation);
@@ -114,9 +119,25 @@ namespace Engine.Scenes {
 			const v60Sprite = sprites.create(Assets.v60, SpriteKind.Food);
 			v60Sprite.x = 88;
 			v60Sprite.y = counterY - 12;
+			v60Sprite.z = 8; // Filtro sobre o balcão
 			const v60Station = new Engine.Entities.Station(v60Sprite, Engine.Entities.BrewMethod.V60);
 			this.stations.push(v60Station);
 			Engine.Entities.EntityManager.add(v60Station);
+
+			// Cria as sacas de café interativas (CoffeeBag) no balcão
+			const bagMantiqueiraSprite = sprites.create(Assets.beanBagMantiqueira, SpriteKind.Food);
+			bagMantiqueiraSprite.x = 112;
+			bagMantiqueiraSprite.y = counterY - 12;
+			bagMantiqueiraSprite.z = 8;
+			const bagMantiqueira = new Engine.Entities.CoffeeBag(bagMantiqueiraSprite, Engine.Entities.CarryType.BeansMantiqueira);
+			Engine.Entities.EntityManager.add(bagMantiqueira);
+
+			const bagColombiaSprite = sprites.create(Assets.beanBagColombian, SpriteKind.Food);
+			bagColombiaSprite.x = 136;
+			bagColombiaSprite.y = counterY - 12;
+			bagColombiaSprite.z = 8;
+			const bagColombia = new Engine.Entities.CoffeeBag(bagColombiaSprite, Engine.Entities.CarryType.BeansColombia);
+			Engine.Entities.EntityManager.add(bagColombia);
 
 			this.queueBaseX = screen.width - 24;
 			this.queueSpacing = 14;
@@ -146,6 +167,7 @@ namespace Engine.Scenes {
 
 			// 4. Desenho de UI seguro
 			game.onPaint(() => {
+				// Clientes e barras de paciência
 				for (let i = 0; i < this.activeCustomers.length; i++) {
 					let c = this.activeCustomers[i];
 					let p = c.paciencia;
@@ -156,6 +178,67 @@ namespace Engine.Scenes {
 						let barW = Math.floor(10 * ratio);
 						screen.fillRect(c.sprite.x - 5, c.sprite.y - 12, 10, 2, 1);
 						screen.fillRect(c.sprite.x - 5, c.sprite.y - 12, barW, 2, 7);
+					}
+				}
+
+				// Barra de progresso, luzes de estado e vapor nas máquinas de café
+				for (let i = 0; i < this.stations.length; i++) {
+					let station = this.stations[i];
+					let state = station.getState();
+					let sprite = station.sprite;
+
+					// Partículas de fumaça/vapor subindo
+					if (state === Engine.Entities.BrewState.Processing || state === Engine.Entities.BrewState.Ready) {
+						let time = game.runtime();
+						for (let p = 0; p < 3; p++) {
+							let offset = (time + p * 300) % 900;
+							let py = sprite.y - 8 - Math.floor(offset / 60);
+							let px = sprite.x + Math.floor(Math.sin((time + p * 500) / 100) * 3);
+							if (py > sprite.y - 24) {
+								screen.setPixel(px, py, 1); // 1 = branco (cor do vapor)
+							}
+						}
+					}
+
+					// Barra de progresso para a máquina
+					if (state === Engine.Entities.BrewState.Processing) {
+						let elapsed = station.getProcessElapsed();
+						let duration = station.getProcessDuration();
+						let ratio = duration > 0 ? (elapsed / duration) : 0;
+						if (ratio > 1) ratio = 1;
+						if (ratio < 0) ratio = 0;
+						let barW = Math.floor(12 * ratio);
+						screen.fillRect(sprite.x - 6, sprite.y - 12, 12, 2, 1); // Fundo branco
+						screen.fillRect(sprite.x - 6, sprite.y - 12, barW, 2, 5); // Progresso verde (cor 5)
+					} else if (state === Engine.Entities.BrewState.Ready) {
+						// Luz indicadora piscando amarelo
+						let blink = (game.runtime() / 200) % 2 === 0;
+						if (blink) {
+							screen.fillCircle(sprite.x, sprite.y - 10, 2, 4); // 4 = amarelo
+						}
+					} else if (state === Engine.Entities.BrewState.Ruined) {
+						// Luz indicadora piscando vermelho
+						let blink = (game.runtime() / 150) % 2 === 0;
+						if (blink) {
+							screen.fillCircle(sprite.x, sprite.y - 10, 2, 2); // 2 = vermelho
+						}
+					}
+				}
+
+				// Item carregado pelo Barista (Balão flutuando acima da cabeça)
+				if (this.barista && this.barista.active) {
+					const carry = this.barista.getCarryType();
+					if (carry !== Engine.Entities.CarryType.None) {
+						let img: Image = null;
+						if (carry === Engine.Entities.CarryType.BeansMantiqueira) img = Assets.beanBagMantiqueira;
+						else if (carry === Engine.Entities.CarryType.BeansColombia) img = Assets.beanBagColombian;
+						else if (carry === Engine.Entities.CarryType.Espresso) img = Assets.espresso;
+						else if (carry === Engine.Entities.CarryType.V60) img = Assets.v60;
+
+						if (img) {
+							// Desenha o item flutuando acima da cabeça (y - 18)
+							screen.drawTransparentImage(img, this.barista.sprite.x - (img.width >> 1), this.barista.sprite.y - 18);
+						}
 					}
 				}
 			});
@@ -212,6 +295,7 @@ namespace Engine.Scenes {
 			sprite.x = spawnX;
 			sprite.y = targetY;
 			sprite.vx = -30;
+			sprite.z = 1; // Fica atrás do balcão (z=5)
 
 			// 6. Criamos e adicionamos à nossa lista em vez do sprite.data
 			let cData = new CustomerRecord(sprite);

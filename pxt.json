@@ -24,6 +24,7 @@
         "engine/entities/Customer.ts",
         "engine/entities/Station.ts",
         "engine/entities/Barista.ts",
+        "engine/entities/CoffeeBag.ts",
         "engine/scenes/Scene.ts",
         "engine/scenes/SceneStack.ts",
         "engine/scenes/GameplayScene.ts",

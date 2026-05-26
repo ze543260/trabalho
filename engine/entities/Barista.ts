@@ -102,11 +102,36 @@ namespace Engine.Entities {
 			}
 
 			if (Engine.Core.justPressed(Engine.Core.Action.Interact)) {
-				// TODO: Call station interaction once collision checks exist.
+				const entities = Engine.Entities.EntityManager.getActiveEntities();
+				let closestEntity: Entity | null = null;
+				let minDistance = 24;
+
+				for (let i = 0; i < entities.length; i++) {
+					const ent = entities[i];
+					if (ent === this) continue;
+
+					if (ent instanceof Station || ent instanceof CoffeeBag) {
+						const dx = Math.abs(this.sprite.x - ent.sprite.x);
+						const dy = Math.abs(this.sprite.y - ent.sprite.y);
+						const dist = dx + dy;
+						if (dist < minDistance) {
+							minDistance = dist;
+							closestEntity = ent;
+						}
+					}
+				}
+
+				if (closestEntity) {
+					if (closestEntity instanceof Station) {
+						this.carryState = closestEntity.interact(this.carryState);
+					} else if (closestEntity instanceof CoffeeBag) {
+						this.carryState = closestEntity.interact(this.carryState);
+					}
+				}
 			}
 
 			if (Engine.Core.justPressed(Engine.Core.Action.Discard)) {
-				// TODO: Call discard logic once inventory system exists.
+				this.carryState = CarryType.None;
 			}
 		}
 	}

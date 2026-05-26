@@ -15,6 +15,18 @@ namespace Engine.Entities {
 			}
 		}
 
+		/** Get all active entities. */
+		public static getActiveEntities(): Entity[] {
+			const active: Entity[] = [];
+			for (let i = 0; i < this.pool.length; i++) {
+				const entity = this.pool[i];
+				if (entity && entity.active) {
+					active.push(entity);
+				}
+			}
+			return active;
+		}
+
 		/** Add an entity to the first free slot. Returns false if full. */
 		public static add(entity: Entity): boolean {
 			if (this.capacity <= 0) {

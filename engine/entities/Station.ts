@@ -89,6 +89,14 @@ namespace Engine.Entities {
 			return baristaCarryType;
 		}
 
+		public getProcessElapsed(): number {
+			return this.processElapsedMs;
+		}
+
+		public getProcessDuration(): number {
+			return this.processDurationMs;
+		}
+
 		/** Update station timers. */
 		public update(dt: number): void {
 			if (!this.active) {

@@ -93,7 +93,7 @@ namespace Engine.Entities {
 			return this.processElapsedMs;
 		}
 
-		public getProcessDuration(): number {
+		public getProcessDurationMs(): number {
 			return this.processDurationMs;
 		}
 

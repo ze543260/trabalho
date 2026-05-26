@@ -56,10 +56,9 @@ namespace Engine.Scenes {
 				if (this.dayEnded) return;
                 // Exemplo de deducoes e verificacao de paciencia
                 for (let s of sprites.allOfKind(SpriteKind.Enemy)) {
-                    let p = sprites.readDataNumber(s, "paciencia");
-                    if (p > 0) {
-                        sprites.setDataNumber(s, "paciencia", p - 1);
-                        if (p - 1 <= 0) {
+                    if (s.data.paciencia > 0) {
+                        s.data.paciencia -= 1;
+                        if (s.data.paciencia <= 0) {
                             s.destroy(); // Vai embora com raiva
                         }
                     }
@@ -69,8 +68,8 @@ namespace Engine.Scenes {
 			// Phase 3: Optimize Progress Bars
 			game.onPaint(() => {
 				for (let s of sprites.allOfKind(SpriteKind.Enemy)) {
-                    let p = sprites.readDataNumber(s, "paciencia");
-                    let maxP = sprites.readDataNumber(s, "pacienciaMax");
+                    let p = s.data.paciencia;
+                    let maxP = s.data.pacienciaMax;
                     if (p > 0 && maxP > 0) {
                         let ratio = p / maxP;
                         if (ratio < 0) ratio = 0;
@@ -92,7 +91,7 @@ namespace Engine.Scenes {
 
 			// Para clientes no alvo
 			for (let s of sprites.allOfKind(SpriteKind.Enemy)) {
-				let tx = sprites.readDataNumber(s, "targetX");
+				let tx = s.data.targetX;
 				if (s.vx < 0 && s.x <= tx) {
 					s.x = tx;
 					s.vx = 0;
@@ -137,25 +136,25 @@ namespace Engine.Scenes {
 
 			// Phase 1: Velocidade nativa
 			sprite.vx = -30;
-			sprites.setDataNumber(sprite, "targetX", targetX);
+			sprite.data.targetX = targetX;
 
 			// Configurando cliente de forma Data-Driven
 			if (randint(0, 4) === 0) {
 				// CoffeeSnob
-				sprites.setDataNumber(sprite, "paciencia", 40);
-				sprites.setDataNumber(sprite, "pacienciaMax", 40);
-				sprites.setDataNumber(sprite, "rewardMultiplier", 3);
-				sprites.setDataNumber(sprite, "desiredBean", Engine.Entities.BeanType.Mantiqueira);
-				sprites.setDataNumber(sprite, "desiredMethod", Engine.Entities.BrewMethod.V60);
+				sprite.data.paciencia = 40;
+				sprite.data.pacienciaMax = 40;
+				sprite.data.rewardMultiplier = 3;
+				sprite.data.desiredBean = Engine.Entities.BeanType.Mantiqueira;
+				sprite.data.desiredMethod = Engine.Entities.BrewMethod.V60;
 			} else {
 				// RushedStudent
-				sprites.setDataNumber(sprite, "paciencia", 10);
-				sprites.setDataNumber(sprite, "pacienciaMax", 10);
-				sprites.setDataNumber(sprite, "rewardMultiplier", 1);
+				sprite.data.paciencia = 10;
+				sprite.data.pacienciaMax = 10;
+				sprite.data.rewardMultiplier = 1;
 				const method = randint(0, 1) === 0 ? Engine.Entities.BrewMethod.Espresso : Engine.Entities.BrewMethod.Capsule;
 				const bean = randint(0, 1) === 0 ? Engine.Entities.BeanType.Mantiqueira : Engine.Entities.BeanType.Colombia;
-				sprites.setDataNumber(sprite, "desiredBean", bean);
-				sprites.setDataNumber(sprite, "desiredMethod", method);
+				sprite.data.desiredBean = bean;
+				sprite.data.desiredMethod = method;
 			}
 		}
 

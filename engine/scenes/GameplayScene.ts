@@ -136,14 +136,14 @@ namespace Engine.Scenes {
 			// 1. Roupa Branca (Padrão)
 			this.customerWardrobe.push(Assets.customerBase);
 			
-			// 2. Roupa Vermelha (Troca a cor 1 pela cor 2)
+			// 2. Roupa Vermelha (Troca a cor 4 pela cor 2)
 			let redCustomer = Assets.customerBase.clone();
-			redCustomer.replace(1, 2);
+			redCustomer.replace(4, 2);
 			this.customerWardrobe.push(redCustomer);
 			
-			// 3. Roupa Azul (Troca a cor 1 pela cor 8)
+			// 3. Roupa Azul (Troca a cor 4 pela cor 8)
 			let blueCustomer = Assets.customerBase.clone();
-			blueCustomer.replace(1, 8);
+			blueCustomer.replace(4, 8);
 			this.customerWardrobe.push(blueCustomer);
 			// -----------------------------------
 

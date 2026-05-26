@@ -12,4 +12,4 @@ game.onUpdate(function() {
 });
 
 // Dá o arranque ao jogo
-Engine.Scenes.SceneStack.push(new Engine.Scenes.GameplayScene());
+Engine.Scenes.SceneStack.push(new Engine.Scenes.MenuScene());

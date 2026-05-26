@@ -8,6 +8,7 @@ namespace Engine.Scenes {
         private ticks: number;
         private onComplete: () => void;
         private bgOverlay: boolean;
+        private renderable: scene.Renderable; // Reference to destroy later
 
         constructor(portrait: Image, lines: string[], onComplete: () => void) {
             this.portrait = portrait;
@@ -21,13 +22,13 @@ namespace Engine.Scenes {
         }
 
         public enter(): void {
-            // Registra a pintura que roda apenas quando esta cena for o topo da pilha
-            // Como é um registro global do MakeCode, precisamos garantir que ele não conflite.
-            // Para não quebrar, usaremos o update para fazer as lógicas de tempo, 
-            // e desenharemos usando onPaint
-            game.onPaint(() => {
+            // Cria um renderizável de alto nível (z=100) para cobrir todos os sprites
+            this.renderable = scene.createRenderable(100, (target: Image, camera: scene.Camera) => {
                 if (SceneStack.top() !== (this as any)) return;
 
+                // Fundo semi-translúcido (pontilhado) opcional para escurecer o fundo
+                // Como não podemos desenhar com alpha perfeitamente, desenharemos um padrão ou deixaremos normal
+                
                 // Caixa de diálogo (embaixo)
                 screen.fillRect(4, 76, screen.width - 8, 40, 1);  // Borda branca
                 screen.fillRect(5, 77, screen.width - 10, 38, 15); // Fundo preto
@@ -67,10 +68,9 @@ namespace Engine.Scenes {
         }
 
         public exit(): void {
-            // Em MakeCode Arcade, remover eventos anônimos é complexo,
-            // mas como a verificação `SceneStack.top() !== this` resolve o conflito, 
-            // basta deixá-la vazar, ou melhor, nós só registramos uma vez se fosse singleton.
-            // Para evitar vazamento extremo, em um jogo completo, teríamos um render global.
+            if (this.renderable) {
+                this.renderable.destroy();
+            }
         }
 
         public update(dt: number): void {

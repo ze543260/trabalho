@@ -22,20 +22,35 @@ namespace Engine.Scenes {
 
 	export class GameplayScene implements Scene {
 		private barista: Engine.Entities.Barista;
-		private stations: Engine.Entities.Station[] = [];
-		private spawnTimerMs: number = 0;
-		private spawnIntervalMs: number = 4000;
-		private dayElapsedMs: number = 0;
-		private dayDurationMs: number = 60000;
-		private spawnSlotIndex: number = 0;
-		private spawnSlotCount: number = 3;
-		private queueBaseX: number = 0;
-		private queueSpacing: number = 12;
-		private queueY: number = 0;
-		private dayEnded: boolean = false;
+		private stations: Engine.Entities.Station[];
+		private spawnTimerMs: number;
+		private spawnIntervalMs: number;
+		private dayElapsedMs: number;
+		private dayDurationMs: number;
+		private spawnSlotIndex: number;
+		private spawnSlotCount: number;
+		private queueBaseX: number;
+		private queueSpacing: number;
+		private queueY: number;
+		private dayEnded: boolean;
 
-		// 2. A nossa lista segura de clientes ativos
-		private activeCustomers: CustomerRecord[] = [];
+		// A nossa lista segura de clientes ativos
+		private activeCustomers: CustomerRecord[];
+
+		constructor() {
+			this.stations = [];
+			this.spawnTimerMs = 0;
+			this.spawnIntervalMs = 4000;
+			this.dayElapsedMs = 0;
+			this.dayDurationMs = 60000;
+			this.spawnSlotIndex = 0;
+			this.spawnSlotCount = 3;
+			this.queueBaseX = 0;
+			this.queueSpacing = 12;
+			this.queueY = 0;
+			this.dayEnded = false;
+			this.activeCustomers = [];
+		}
 
 		public enter(): void {
 			Engine.Entities.EntityManager.init(30);

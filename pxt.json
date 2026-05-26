@@ -2,7 +2,7 @@
     "name": "MantiqueiraBrew-Engine",
     "description": "Tycoon Engine para MakeCode Arcade",
     "dependencies": {
-        "device": "*"       
+        "device": "*"
     },
     "files": [
         "assets/assets.ts",
@@ -24,13 +24,13 @@
         "engine/entities/Customer.ts",
         "engine/entities/Station.ts",
         "engine/entities/Barista.ts",
-        "engine/entities/CoffeeBag.ts",
         "engine/scenes/Scene.ts",
         "engine/scenes/SceneStack.ts",
         "engine/scenes/GameplayScene.ts",
         "engine/scenes/MenuScene.ts",
         "engine/scenes/ShopScene.ts",
-        "main.ts"
+        "main.ts",
+        "engine/entities/CoffeeBag.ts"
     ],
     "testFiles": [
         "test.ts"

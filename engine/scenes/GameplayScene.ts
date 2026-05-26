@@ -62,7 +62,7 @@ namespace Engine.Scenes {
 
 			// --- NOVO: PINTANDO O CENÁRIO ESTÁTICO ---
 			let bg = image.create(screen.width, screen.height);
-			bg.fill(13); // Preenche com uma cor base (opcional)
+			bg.fill(13); // Fundo rosa/bege claro da parede (cor 13)
 
 			// Carimba o chão da metade da tela para baixo
 			for (let x = 0; x < screen.width; x += 16) {
@@ -70,6 +70,43 @@ namespace Engine.Scenes {
 					bg.drawTransparentImage(Assets.floorTile, x, y);
 				}
 			}
+
+			// Quadro de Menu na Parede (Esquerda)
+			bg.fillRect(8, 6, 36, 26, 15); // Preto/Cinza Escuro (cor 15)
+			bg.rect(8, 6, 36, 26, 1);      // Moldura branca (cor 1)
+			bg.drawLine(12, 10, 24, 10, 4); // "MENU" em amarelo (cor 4)
+			bg.drawLine(12, 15, 36, 15, 1); // Itens do menu em branco
+			bg.drawLine(12, 19, 32, 19, 1);
+			bg.drawLine(12, 23, 34, 23, 1);
+
+			// Quadro de Café Decorativo na Parede (Direita)
+			bg.fillRect(124, 6, 24, 24, 11); // Fundo verde (cor 11)
+			bg.rect(124, 6, 24, 24, 12);     // Moldura marrom (cor 12)
+			// Desenha uma xícara simples no quadro
+			bg.fillRect(132, 18, 8, 6, 1);    // Xícara branca
+			bg.fillRect(140, 19, 2, 3, 1);    // Asa da xícara
+			bg.drawLine(134, 15, 134, 16, 4); // Fumacinha amarela
+			bg.drawLine(137, 14, 137, 16, 4);
+
+			// Círculo base do relógio na parede
+			bg.fillCircle(80, 16, 7, 1);      // Círculo branco
+			bg.drawCircle(80, 16, 7, 12);     // Moldura marrom
+
+			// Plantas decorativas nos cantos inferiores (vasos de flor)
+			// Esquerda:
+			bg.fillRect(2, counterY + 4, 8, 12, 12);   // Vaso marrom
+			bg.fillCircle(6, counterY - 2, 5, 7);      // Folhas verdes
+			bg.fillCircle(3, counterY - 5, 4, 6);
+			bg.fillCircle(9, counterY - 5, 4, 6);
+			// Direita:
+			bg.fillRect(screen.width - 10, counterY + 4, 8, 12, 12);
+			bg.fillCircle(screen.width - 6, counterY - 2, 5, 7);
+			bg.fillCircle(screen.width - 9, counterY - 5, 4, 6);
+			bg.fillCircle(screen.width - 3, counterY - 5, 4, 6);
+
+			// Tapete vermelho na área de serviço do barista
+			bg.fillRect(16, counterY + 20, 128, 12, 2); // Tapete vermelho (cor 2)
+			bg.rect(16, counterY + 20, 128, 12, 4);     // Detalhe laranja (cor 4)
 
 			// Define essa imagem pintada como o fundo imutável da cena
 			scene.setBackgroundImage(bg);
@@ -141,7 +178,7 @@ namespace Engine.Scenes {
 
 			this.queueBaseX = screen.width - 24;
 			this.queueSpacing = 14;
-			this.queueY = counterY - 8;
+			this.queueY = counterY - 22; // Posiciona mais acima para andarem atrás do balcão
 			this.spawnSlotIndex = 0;
 			this.spawnTimerMs = 0;
 			this.dayElapsedMs = 0;
@@ -225,6 +262,14 @@ namespace Engine.Scenes {
 					}
 				}
 
+				// Ponteiros do Relógio Ticking na parede
+				let sec = (game.runtime() / 1000) % 60;
+				let angle = (sec / 60) * 2 * Math.PI - Math.PI / 2;
+				let handX = 80 + Math.floor(Math.cos(angle) * 4);
+				let handY = 16 + Math.floor(Math.sin(angle) * 4);
+				screen.drawLine(80, 16, handX, handY, 2); // Ponteiro de segundos vermelho (cor 2)
+				screen.drawLine(80, 16, 80, 13, 15);     // Ponteiro de horas fixo/preto (cor 15)
+
 				// Item carregado pelo Barista (Balão flutuando acima da cabeça)
 				if (this.barista && this.barista.active) {
 					const carry = this.barista.getCarryType();
@@ -248,12 +293,19 @@ namespace Engine.Scenes {
 			Engine.Entities.EntityManager.update(dt);
 			Engine.FX.FXManager.update(dt);
 
-			// 5. Atualização de Posição
+			// 5. Atualização de Posição e Bobbing
 			for (let i = 0; i < this.activeCustomers.length; i++) {
 				let c = this.activeCustomers[i];
 				if (c.sprite.vx < 0 && c.sprite.x <= c.targetX) {
 					c.sprite.x = c.targetX;
 					c.sprite.vx = 0;
+				}
+
+				// Bobbing suave ao caminhar
+				if (c.sprite.vx !== 0) {
+					c.sprite.y = this.queueY + Math.floor(Math.sin(game.runtime() / 80) * 2);
+				} else {
+					c.sprite.y = this.queueY;
 				}
 			}
 

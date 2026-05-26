@@ -50,4 +50,12 @@ namespace Engine.Core {
     export function freeSprite(s: Sprite) {
         if (s) s.destroy();
     }
+
+    // Global Tycoon state variables
+    export namespace TycoonState {
+        export let money: number = 20; // Starts with $20
+        export let maxCounterSlots: number = 1; // Starts with 1 customer slot
+        export let baristaSpeedLevel: number = 0;
+        export let hasCapsuleMachine: boolean = false;
+    }
 }

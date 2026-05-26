@@ -25,7 +25,7 @@ namespace Engine.Scenes {
 			const windowX = margin;
 			const windowY = margin;
 
-			this.window = new Engine.UI.Window(windowX, windowY, windowWidth, windowHeight, "Loja");
+			this.window = new Engine.UI.Window(windowX, windowY, windowWidth, windowHeight, "Loja - $" + Engine.Core.TycoonState.money);
 			Engine.UI.UIManager.add(this.window);
 
 			const buttonWidth = windowWidth - 16;
@@ -42,15 +42,36 @@ namespace Engine.Scenes {
 				console.log("TODO: Comprar Maquina de Capsulas");
 			});
 
+			buttonY += buttonHeight + 6;
+			let counterPrice = Engine.Core.TycoonState.maxCounterSlots * 15;
+			let counterText = "";
+			if (Engine.Core.TycoonState.maxCounterSlots >= 5) {
+				counterText = "Balcao no Maximo (5)";
+			} else {
+				counterText = "Expandir Balcao: $" + counterPrice;
+			}
+			const counterButton = new Engine.UI.Button(buttonX, buttonY, buttonWidth, buttonHeight, counterText, function (): void {
+				if (Engine.Core.TycoonState.maxCounterSlots < 5) {
+					if (Engine.Core.TycoonState.money >= counterPrice) {
+						Engine.Core.TycoonState.money -= counterPrice;
+						Engine.Core.TycoonState.maxCounterSlots += 1;
+						Engine.Scenes.SceneStack.pop();
+						Engine.Scenes.SceneStack.push(new Engine.Scenes.ShopScene());
+					}
+				}
+			});
+
 			this.buttons = [];
 			this.buttons.push(grinderButton);
 			this.buttons.push(capsuleButton);
+			this.buttons.push(counterButton);
 			this.buttonCount = this.buttons.length;
 			this.focusedIndex = 0;
 			this.applyFocus();
 
 			Engine.UI.UIManager.add(grinderButton);
 			Engine.UI.UIManager.add(capsuleButton);
+			Engine.UI.UIManager.add(counterButton);
 		}
 
 		/** Handle input and update UI. */

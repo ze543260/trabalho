@@ -8,6 +8,7 @@ namespace Engine.Scenes {
 		public rewardMultiplier: number;
 		public desiredBean: Engine.Entities.BeanType;
 		public desiredMethod: Engine.Entities.BrewMethod;
+		public slotIndex: number;
 
 		constructor(s: Sprite) {
 			this.sprite = s;
@@ -17,6 +18,7 @@ namespace Engine.Scenes {
 			this.rewardMultiplier = 0;
 			this.desiredBean = Engine.Entities.BeanType.None;
 			this.desiredMethod = Engine.Entities.BrewMethod.Espresso;
+			this.slotIndex = -1;
 		}
 	}
 
@@ -27,12 +29,11 @@ namespace Engine.Scenes {
 		private spawnIntervalMs: number;
 		private dayElapsedMs: number;
 		private dayDurationMs: number;
-		private spawnSlotIndex: number;
-		private spawnSlotCount: number;
 		private queueBaseX: number;
 		private queueSpacing: number;
 		private queueY: number;
 		private dayEnded: boolean;
+		private occupiedSlots: CustomerRecord[];
 
 		// A nossa lista segura de clientes ativos
 		private activeCustomers: CustomerRecord[];
@@ -44,12 +45,11 @@ namespace Engine.Scenes {
 			this.spawnIntervalMs = 4000;
 			this.dayElapsedMs = 0;
 			this.dayDurationMs = 60000;
-			this.spawnSlotIndex = 0;
-			this.spawnSlotCount = 3;
 			this.queueBaseX = 0;
 			this.queueSpacing = 12;
 			this.queueY = 0;
 			this.dayEnded = false;
+			this.occupiedSlots = [];
 			this.activeCustomers = [];
 			this.customerWardrobe = []; // <-- NOVO
 		}
@@ -76,7 +76,7 @@ namespace Engine.Scenes {
 
 			// Quadro de Menu na Parede (Esquerda)
 			bg.fillRect(8, 6, 36, 26, 15); // Preto/Cinza Escuro (cor 15)
-			bg.drawRect(8, 6, 36, 26, 1);      // Moldura branca (cor 1)
+			bg.drawRect(8, 6, 36, 26, 1);  // Moldura branca (cor 1)
 			bg.drawLine(12, 10, 24, 10, 4); // "MENU" em amarelo (cor 4)
 			bg.drawLine(12, 15, 36, 15, 1); // Itens do menu em branco
 			bg.drawLine(12, 19, 32, 19, 1);
@@ -103,6 +103,18 @@ namespace Engine.Scenes {
 			}
 			// Sombra projetada do balcão no chão (dá profundidade 3D)
 			bg.fillRect(0, counterY - 8, screen.width, 4, 1); 
+
+			// Desenha os bancos/lugares do balcão (de acordo com maxCounterSlots)
+			const maxSlotsBg = Engine.Core.TycoonState.maxCounterSlots;
+			for (let i = 0; i < maxSlotsBg; i++) {
+				let slotX = (screen.width - 24) - (i * 14);
+				// Pernas do banco
+				bg.drawLine(slotX - 2, counterY - 5, slotX - 2, counterY, 1);
+				bg.drawLine(slotX + 2, counterY - 5, slotX + 2, counterY, 1);
+				// Assento
+				bg.fillCircle(slotX, counterY - 6, 3, 15);
+				bg.fillCircle(slotX, counterY - 7, 3, 14);
+			} 
 
 			// 3. Tapete da área de serviço (Mais detalhado e escuro)
 			bg.fillRect(16, counterY + 16, 128, 16, 9); // Tapete escuro (cor 9)
@@ -197,7 +209,13 @@ namespace Engine.Scenes {
 			this.queueBaseX = screen.width - 24;
 			this.queueSpacing = 14;
 			this.queueY = counterY - 22; // Posiciona mais acima para andarem atrás do balcão
-			this.spawnSlotIndex = 0;
+			
+			this.occupiedSlots = [];
+			const maxSlots = Engine.Core.TycoonState.maxCounterSlots;
+			for (let i = 0; i < maxSlots; i++) {
+				this.occupiedSlots.push(null);
+			}
+
 			this.spawnTimerMs = 0;
 			this.dayElapsedMs = 0;
 			this.dayEnded = false;
@@ -213,6 +231,9 @@ namespace Engine.Scenes {
 					if (c.paciencia > 0) {
 						c.paciencia -= 1;
 						if (c.paciencia <= 0) {
+							if (c.slotIndex >= 0 && c.slotIndex < this.occupiedSlots.length) {
+								this.occupiedSlots[c.slotIndex] = null;
+							}
 							c.sprite.destroy(); // Destrói visualmente
 							this.activeCustomers.removeElement(c);
 						}
@@ -325,10 +346,62 @@ namespace Engine.Scenes {
 						}
 					}
 				}
+
+				// HUD: Money Box (Top-Left)
+				screen.fillRect(2, 2, 40, 9, 1);    // Moldura/fundo branco
+				screen.fillRect(3, 3, 38, 7, 15);   // Fundo preto
+				screen.print("$" + Engine.Core.TycoonState.money, 5, 4, 6); // Texto em cor creme (cor 6)
 			});
 		}
 
 		public update(dt: number): void {
+			// Entrega de café aos clientes
+			if (Engine.Core.justPressed(Engine.Core.Action.Interact)) {
+				let carry = this.barista.getCarryType();
+				if (carry === Engine.Entities.CarryType.Espresso || carry === Engine.Entities.CarryType.V60 || carry === Engine.Entities.CarryType.Capsule) {
+					let baristaSprite = this.barista.sprite;
+					let closestCustomer: CustomerRecord = null;
+					let minDistance = 24;
+
+					for (let i = 0; i < this.activeCustomers.length; i++) {
+						let c = this.activeCustomers[i];
+						if (c.sprite.vx === 0) {
+							let dist = Math.abs(baristaSprite.x - c.sprite.x);
+							if (dist < minDistance && baristaSprite.y < this.queueY + 36) {
+								minDistance = dist;
+								closestCustomer = c;
+							}
+						}
+					}
+
+					if (closestCustomer) {
+						let methodMatch = false;
+						if (closestCustomer.desiredMethod === Engine.Entities.BrewMethod.Espresso && carry === Engine.Entities.CarryType.Espresso) methodMatch = true;
+						else if (closestCustomer.desiredMethod === Engine.Entities.BrewMethod.V60 && carry === Engine.Entities.CarryType.V60) methodMatch = true;
+						else if (closestCustomer.desiredMethod === Engine.Entities.BrewMethod.Capsule && carry === Engine.Entities.CarryType.Capsule) methodMatch = true;
+
+						if (methodMatch) {
+							let gain = 10 * closestCustomer.rewardMultiplier;
+							Engine.Core.TycoonState.money += gain;
+							
+							// Som clássico de "ba-ding"
+							music.playTone(523, 80);
+							music.playTone(659, 120);
+							
+							// Liberta o slot
+							if (closestCustomer.slotIndex >= 0 && closestCustomer.slotIndex < this.occupiedSlots.length) {
+								this.occupiedSlots[closestCustomer.slotIndex] = null;
+							}
+							
+							closestCustomer.sprite.destroy();
+							this.activeCustomers.removeElement(closestCustomer);
+							
+							this.barista.setCarryType(Engine.Entities.CarryType.None);
+						}
+					}
+				}
+			}
+
 			Engine.Entities.EntityManager.update(dt);
 			Engine.FX.FXManager.update(dt);
 
@@ -373,13 +446,23 @@ namespace Engine.Scenes {
 		}
 
 		private spawnCustomer(): void {
-			const spawnX = screen.width + 16;
-			const targetX = this.queueBaseX - (this.spawnSlotIndex * this.queueSpacing);
-			const targetY = this.queueY;
-			this.spawnSlotIndex += 1;
-			if (this.spawnSlotIndex >= this.spawnSlotCount) {
-				this.spawnSlotIndex = 0;
+			// Acha o primeiro slot vago
+			let freeSlotIndex = -1;
+			for (let i = 0; i < this.occupiedSlots.length; i++) {
+				if (this.occupiedSlots[i] === null) {
+					freeSlotIndex = i;
+					break;
+				}
 			}
+
+			// Se todos os slots estiverem preenchidos, não spawna mais clientes
+			if (freeSlotIndex === -1) {
+				return;
+			}
+
+			const spawnX = screen.width + 16;
+			const targetX = this.queueBaseX - (freeSlotIndex * this.queueSpacing);
+			const targetY = this.queueY;
 
 			let randomLook = this.customerWardrobe[randint(0, this.customerWardrobe.length - 1)];
 			const sprite = sprites.create(randomLook, SpriteKind.Enemy);
@@ -388,9 +471,9 @@ namespace Engine.Scenes {
 			sprite.vx = -30;
 			sprite.z = 1; // Fica atrás do balcão (z=5)
 
-			// 6. Criamos e adicionamos à nossa lista em vez do sprite.data
 			let cData = new CustomerRecord(sprite);
 			cData.targetX = targetX;
+			cData.slotIndex = freeSlotIndex;
 
 			if (randint(0, 4) === 0) {
 				cData.paciencia = 40;
@@ -406,6 +489,7 @@ namespace Engine.Scenes {
 				cData.desiredBean = randint(0, 1) === 0 ? Engine.Entities.BeanType.Mantiqueira : Engine.Entities.BeanType.Colombia;
 			}
 
+			this.occupiedSlots[freeSlotIndex] = cData;
 			this.activeCustomers.push(cData);
 		}
 

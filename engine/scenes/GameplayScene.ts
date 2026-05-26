@@ -1,4 +1,14 @@
 namespace Engine.Scenes {
+	// Estrutura estrita para o compilador C++ não travar
+	export class CustomerData {
+		public targetX: number = 0;
+		public paciencia: number = 0;
+		public pacienciaMax: number = 0;
+		public rewardMultiplier: number = 0;
+		public desiredBean: Engine.Entities.BeanType = Engine.Entities.BeanType.None;
+		public desiredMethod: Engine.Entities.BrewMethod = Engine.Entities.BrewMethod.Espresso;
+	}
+
 	/**
 	 * Main gameplay scene that orchestrates entities and day flow.
 	 */
@@ -55,38 +65,38 @@ namespace Engine.Scenes {
 			game.onUpdateInterval(1000, () => {
 				if (this.dayEnded) return;
                 
-                // Troque o for...of pelo for clássico
-                let enemies = sprites.allOfKind(SpriteKind.Enemy);
-                for (let i = 0; i < enemies.length; i++) {
-                    let s = enemies[i];
-                    if (s.data && s.data.paciencia > 0) {
-                        s.data.paciencia -= 1;
-                        if (s.data.paciencia <= 0) {
-                            s.destroy(); // Vai embora com raiva
-                        }
-                    }
-                }
+				let enemies = sprites.allOfKind(SpriteKind.Enemy);
+				for (let i = 0; i < enemies.length; i++) {
+					let s = enemies[i];
+					let cData = s.data as CustomerData; // Avisa o C++ o que é isso
+					if (cData && cData.paciencia > 0) {
+						cData.paciencia -= 1;
+						if (cData.paciencia <= 0) {
+							s.destroy(); // Vai embora com raiva
+						}
+					}
+				}
 			});
 
 			// Phase 3: Optimize Progress Bars
-            // NOTA: Em algumas versões do MakeCode, scene.onRender é mais seguro que game.onPaint
-            game.onPaint(() => {
-                let enemies = sprites.allOfKind(SpriteKind.Enemy);
-                for (let i = 0; i < enemies.length; i++) {
-                    let s = enemies[i];
-                    if (s.data) {
-                        let p = s.data.paciencia;
-                        let maxP = s.data.pacienciaMax;
-                        if (p > 0 && maxP > 0) {
-                            let ratio = p / maxP;
-                            if (ratio < 0) ratio = 0;
-                            let barW = Math.floor(10 * ratio);
-                            screen.fillRect(s.x - 5, s.y - 12, 10, 2, 1); // Fundo
-                            screen.fillRect(s.x - 5, s.y - 12, barW, 2, 7); // Barra
-                        }
-                    }
-                }
-            });
+			game.onPaint(() => {
+				let enemies = sprites.allOfKind(SpriteKind.Enemy);
+				for (let i = 0; i < enemies.length; i++) {
+					let s = enemies[i];
+					let cData = s.data as CustomerData;
+					if (cData) {
+						let p = cData.paciencia;
+						let maxP = cData.pacienciaMax;
+						if (p > 0 && maxP > 0) {
+							let ratio = p / maxP;
+							if (ratio < 0) ratio = 0;
+							let barW = Math.floor(10 * ratio);
+							screen.fillRect(s.x - 5, s.y - 12, 10, 2, 1); // Fundo
+							screen.fillRect(s.x - 5, s.y - 12, barW, 2, 7); // Barra
+						}
+					}
+				}
+			});
 
 			// Phase 1: Colisoes nativas (exemplo: bate na "parede" invisivel do balcao/fila)
 			// (se tivessemos tilemap usariamos scene.onHitWall aqui, por hora assumimos que param)
@@ -97,12 +107,17 @@ namespace Engine.Scenes {
 			Engine.Entities.EntityManager.update(dt);
 			Engine.FX.FXManager.update(dt);
 
-			// Para clientes no alvo
-			for (let s of sprites.allOfKind(SpriteKind.Enemy)) {
-				let tx = s.data.targetX;
-				if (s.vx < 0 && s.x <= tx) {
-					s.x = tx;
-					s.vx = 0;
+			// Para clientes no alvo (Loop C++ Friendly)
+			let enemies = sprites.allOfKind(SpriteKind.Enemy);
+			for (let i = 0; i < enemies.length; i++) {
+				let s = enemies[i];
+				let cData = s.data as CustomerData;
+				if (cData) {
+					let tx = cData.targetX;
+					if (s.vx < 0 && s.x <= tx) {
+						s.x = tx;
+						s.vx = 0;
+					}
 				}
 			}
 
@@ -144,26 +159,30 @@ namespace Engine.Scenes {
 
 			// Phase 1: Velocidade nativa
 			sprite.vx = -30;
-			sprite.data.targetX = targetX;
+            
+			// Cria o pacote de dados ESTRITO
+			let cData = new CustomerData();
+			cData.targetX = targetX;
 
-			// Configurando cliente de forma Data-Driven
+			// Configurando cliente
 			if (randint(0, 4) === 0) {
 				// CoffeeSnob
-				sprite.data.paciencia = 40;
-				sprite.data.pacienciaMax = 40;
-				sprite.data.rewardMultiplier = 3;
-				sprite.data.desiredBean = Engine.Entities.BeanType.Mantiqueira;
-				sprite.data.desiredMethod = Engine.Entities.BrewMethod.V60;
+				cData.paciencia = 40;
+				cData.pacienciaMax = 40;
+				cData.rewardMultiplier = 3;
+				cData.desiredBean = Engine.Entities.BeanType.Mantiqueira;
+				cData.desiredMethod = Engine.Entities.BrewMethod.V60;
 			} else {
 				// RushedStudent
-				sprite.data.paciencia = 10;
-				sprite.data.pacienciaMax = 10;
-				sprite.data.rewardMultiplier = 1;
-				const method = randint(0, 1) === 0 ? Engine.Entities.BrewMethod.Espresso : Engine.Entities.BrewMethod.Capsule;
-				const bean = randint(0, 1) === 0 ? Engine.Entities.BeanType.Mantiqueira : Engine.Entities.BeanType.Colombia;
-				sprite.data.desiredBean = bean;
-				sprite.data.desiredMethod = method;
+				cData.paciencia = 10;
+				cData.pacienciaMax = 10;
+				cData.rewardMultiplier = 1;
+				cData.desiredMethod = randint(0, 1) === 0 ? Engine.Entities.BrewMethod.Espresso : Engine.Entities.BrewMethod.Capsule;
+				cData.desiredBean = randint(0, 1) === 0 ? Engine.Entities.BeanType.Mantiqueira : Engine.Entities.BeanType.Colombia;
 			}
+            
+			// Acopla ao nativo com segurança
+			sprite.data = cData;
 		}
 
 		private updateDayClock(dt: number): void {

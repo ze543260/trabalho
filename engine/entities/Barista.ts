@@ -81,11 +81,19 @@ namespace Engine.Entities {
 			}
 
 			const dtSeconds = dt > 0 ? (dt / 1000) : 0;
-			if (this.blocksAboveCounter && dtSeconds > 0) {
+			if (dtSeconds > 0) {
 				const nextY = this.sprite.y + vy * dtSeconds;
-				if (nextY < this.counterY) {
+				if (this.blocksAboveCounter && nextY < this.counterY) {
 					this.sprite.y = this.counterY;
 					if (vy < 0) {
+						vy = 0;
+					}
+				}
+				// Evita que o Barista passe por cima do balcão de baixo (y = screen.height - 24)
+				const maxWalkY = screen.height - 24;
+				if (nextY > maxWalkY) {
+					this.sprite.y = maxWalkY;
+					if (vy > 0) {
 						vy = 0;
 					}
 				}

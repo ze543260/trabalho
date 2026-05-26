@@ -104,9 +104,13 @@ namespace Engine.Scenes {
 			bg.fillCircle(screen.width - 9, counterY - 5, 4, 6);
 			bg.fillCircle(screen.width - 3, counterY - 5, 4, 6);
 
-			// Tapete vermelho na área de serviço do barista
-			bg.fillRect(16, counterY + 20, 128, 12, 2); // Tapete vermelho (cor 2)
-			bg.drawRect(16, counterY + 20, 128, 12, 4);     // Detalhe laranja (cor 4)
+			// Tapete vermelho no centro da área de serviço do barista
+			bg.fillRect(24, counterY + 8, 112, 16, 2); // Tapete vermelho (cor 2)
+			bg.drawRect(24, counterY + 8, 112, 16, 4);     // Detalhe laranja (cor 4)
+
+			// Balcão de trabalho inferior (onde ficam as máquinas e sacas)
+			bg.fillRect(16, screen.height - 24, 128, 24, 12); // Mesa de madeira marrom (cor 12)
+			bg.drawRect(16, screen.height - 24, 128, 24, 1);  // Borda branca (cor 1)
 
 			// Define essa imagem pintada como o fundo imutável da cena
 			scene.setBackgroundImage(bg);
@@ -138,40 +142,40 @@ namespace Engine.Scenes {
 			}
 
 			const baristaSprite = sprites.create(Assets.baristaBase, SpriteKind.Player);
-			baristaSprite.x = 24;
-			baristaSprite.y = screen.height - 16;
+			baristaSprite.x = 80;
+			baristaSprite.y = counterY + 12; // Começa no meio do corredor
 			baristaSprite.z = 10; // Barista à frente do balcão
 			this.barista = new Engine.Entities.Barista(baristaSprite, 50, counterY);
 			Engine.Entities.EntityManager.add(this.barista);
 
 			this.stations = [];
 			const espressoSprite = sprites.create(Assets.espresso, SpriteKind.Food);
-			espressoSprite.x = 64;
-			espressoSprite.y = counterY - 12;
-			espressoSprite.z = 8; // Máquina sobre o balcão
+			espressoSprite.x = 32;
+			espressoSprite.y = screen.height - 16; // Mesa inferior
+			espressoSprite.z = 8;
 			const espressoStation = new Engine.Entities.Station(espressoSprite, Engine.Entities.BrewMethod.Espresso);
 			this.stations.push(espressoStation);
 			Engine.Entities.EntityManager.add(espressoStation);
 
 			const v60Sprite = sprites.create(Assets.v60, SpriteKind.Food);
-			v60Sprite.x = 88;
-			v60Sprite.y = counterY - 12;
-			v60Sprite.z = 8; // Filtro sobre o balcão
+			v60Sprite.x = 64;
+			v60Sprite.y = screen.height - 16; // Mesa inferior
+			v60Sprite.z = 8;
 			const v60Station = new Engine.Entities.Station(v60Sprite, Engine.Entities.BrewMethod.V60);
 			this.stations.push(v60Station);
 			Engine.Entities.EntityManager.add(v60Station);
 
-			// Cria as sacas de café interativas (CoffeeBag) no balcão
+			// Cria as sacas de café interativas (CoffeeBag) no balcão de baixo
 			const bagMantiqueiraSprite = sprites.create(Assets.beanBagMantiqueira, SpriteKind.Food);
-			bagMantiqueiraSprite.x = 112;
-			bagMantiqueiraSprite.y = counterY - 12;
+			bagMantiqueiraSprite.x = 96;
+			bagMantiqueiraSprite.y = screen.height - 16;
 			bagMantiqueiraSprite.z = 8;
 			const bagMantiqueira = new Engine.Entities.CoffeeBag(bagMantiqueiraSprite, Engine.Entities.CarryType.BeansMantiqueira);
 			Engine.Entities.EntityManager.add(bagMantiqueira);
 
 			const bagColombiaSprite = sprites.create(Assets.beanBagColombian, SpriteKind.Food);
-			bagColombiaSprite.x = 136;
-			bagColombiaSprite.y = counterY - 12;
+			bagColombiaSprite.x = 128;
+			bagColombiaSprite.y = screen.height - 16;
 			bagColombiaSprite.z = 8;
 			const bagColombia = new Engine.Entities.CoffeeBag(bagColombiaSprite, Engine.Entities.CarryType.BeansColombia);
 			Engine.Entities.EntityManager.add(bagColombia);

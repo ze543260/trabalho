@@ -70,7 +70,7 @@ namespace Engine.Scenes {
 
 			// Phase 3: Optimize Progress Bars
             // NOTA: Em algumas versões do MakeCode, scene.onRender é mais seguro que game.onPaint
-            scene.onRender(() => {
+            game.onPaint(() => {
                 let enemies = sprites.allOfKind(SpriteKind.Enemy);
                 for (let i = 0; i < enemies.length; i++) {
                     let s = enemies[i];

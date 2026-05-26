@@ -54,9 +54,12 @@ namespace Engine.Scenes {
 			// Phase 2: GameTick for Economy
 			game.onUpdateInterval(1000, () => {
 				if (this.dayEnded) return;
-                // Exemplo de deducoes e verificacao de paciencia
-                for (let s of sprites.allOfKind(SpriteKind.Enemy)) {
-                    if (s.data.paciencia > 0) {
+                
+                // Troque o for...of pelo for clássico
+                let enemies = sprites.allOfKind(SpriteKind.Enemy);
+                for (let i = 0; i < enemies.length; i++) {
+                    let s = enemies[i];
+                    if (s.data && s.data.paciencia > 0) {
                         s.data.paciencia -= 1;
                         if (s.data.paciencia <= 0) {
                             s.destroy(); // Vai embora com raiva
@@ -66,19 +69,24 @@ namespace Engine.Scenes {
 			});
 
 			// Phase 3: Optimize Progress Bars
-			game.onPaint(() => {
-				for (let s of sprites.allOfKind(SpriteKind.Enemy)) {
-                    let p = s.data.paciencia;
-                    let maxP = s.data.pacienciaMax;
-                    if (p > 0 && maxP > 0) {
-                        let ratio = p / maxP;
-                        if (ratio < 0) ratio = 0;
-                        let barW = Math.floor(10 * ratio);
-                        screen.fillRect(s.x - 5, s.y - 12, 10, 2, 1); // Fundo
-                        screen.fillRect(s.x - 5, s.y - 12, barW, 2, 7); // Barra
+            // NOTA: Em algumas versões do MakeCode, scene.onRender é mais seguro que game.onPaint
+            scene.onRender(() => {
+                let enemies = sprites.allOfKind(SpriteKind.Enemy);
+                for (let i = 0; i < enemies.length; i++) {
+                    let s = enemies[i];
+                    if (s.data) {
+                        let p = s.data.paciencia;
+                        let maxP = s.data.pacienciaMax;
+                        if (p > 0 && maxP > 0) {
+                            let ratio = p / maxP;
+                            if (ratio < 0) ratio = 0;
+                            let barW = Math.floor(10 * ratio);
+                            screen.fillRect(s.x - 5, s.y - 12, 10, 2, 1); // Fundo
+                            screen.fillRect(s.x - 5, s.y - 12, barW, 2, 7); // Barra
+                        }
                     }
-				}
-			});
+                }
+            });
 
 			// Phase 1: Colisoes nativas (exemplo: bate na "parede" invisivel do balcao/fila)
 			// (se tivessemos tilemap usariamos scene.onHitWall aqui, por hora assumimos que param)

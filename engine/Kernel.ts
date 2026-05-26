@@ -1,13 +1,11 @@
 namespace Engine.Core {
     export let deltaTime: number = 0;
     let lastTime: number = 0;
-    let updateCallbacks: ((dt: number) => void)[] = [];
 
     export enum Action { Up, Down, Left, Right, Interact, Discard }
     
     let currentInput: boolean[] = [];
     let previousInput: boolean[] = [];
-    let spritePool: Sprite[][] = [];
 
     export function init() {
         lastTime = control.millis();
@@ -21,14 +19,7 @@ namespace Engine.Core {
             deltaTime = now - lastTime;
             lastTime = now;
             updateInput();
-            for (let cb of updateCallbacks) {
-                cb(deltaTime);
-            }
         });
-    }
-
-    export function registerUpdate(cb: (dt: number) => void) {
-        updateCallbacks.push(cb);
     }
 
     function updateInput() {
@@ -51,35 +42,12 @@ namespace Engine.Core {
         return currentInput[action] && !previousInput[action];
     }
 
+    // Deixe a Engine.Core apenas repassar para o nativo
     export function allocSprite(img: Image, kind: number): Sprite {
-        if (!spritePool[kind]) {
-            spritePool[kind] = [];
-        }
-        if (spritePool[kind].length > 0) {
-            const s = spritePool[kind].pop();
-            if (s) {
-                s.setImage(img);
-                s.setFlag(SpriteFlag.Invisible, false);
-                s.setFlag(SpriteFlag.Ghost, false);
-                s.vx = 0;
-                s.vy = 0;
-                return s;
-            }
-        }
-
         return sprites.create(img, kind);
     }
 
     export function freeSprite(s: Sprite) {
-        if (!s) return;
-        s.setFlag(SpriteFlag.Invisible, true);
-        s.setFlag(SpriteFlag.Ghost, true);
-        s.x = -999;
-        s.y = -999;
-        s.vx = 0;
-        s.vy = 0;
-        let kind = s.kind();
-        if (!spritePool[kind]) spritePool[kind] = [];
-        spritePool[kind].push(s);
+        if (s) s.destroy();
     }
 }

@@ -35,9 +35,14 @@ namespace Engine.Scenes {
 		private dayEnded: boolean;
 		private occupiedSlots: CustomerRecord[];
 
-		// A nossa lista segura de clientes ativos
 		private activeCustomers: CustomerRecord[];
 		private customerWardrobe: Image[]; // <-- NOVO
+		
+		// --- ADVANCED VFX ---
+		private floatingTexts: {text: string, x: number, y: number, vy: number, life: number, maxLife: number}[];
+		private dustParticles: {x: number, y: number, vx: number, vy: number, baseVy: number}[];
+		private catImg1: Image;
+		private catImg2: Image;
 
 		constructor() {
 			this.stations = [];
@@ -51,7 +56,46 @@ namespace Engine.Scenes {
 			this.dayEnded = false;
 			this.occupiedSlots = [];
 			this.activeCustomers = [];
-			this.customerWardrobe = []; // <-- NOVO
+			this.customerWardrobe = [];
+			
+			this.floatingTexts = [];
+			this.dustParticles = [];
+			for(let i = 0; i < 15; i++) {
+				this.dustParticles.push({
+					x: randint(0, 160),
+					y: randint(0, 120),
+					vx: 0,
+					vy: (randint(1, 10) / 20),
+					baseVy: (randint(1, 10) / 20)
+				});
+			}
+			
+			// Simple sleeping cat sprite (2 frames for breathing)
+			this.catImg1 = img`
+				. . . . . . . . . .
+				. . . . e e e . . .
+				. . e e e e e e . .
+				. e e e e e e e e .
+				. . e f e e f e . .
+				. . e e e e e e . .
+				. . . e e e e . . .
+			`;
+			this.catImg1.replace(0xE, 12); // Brown
+			this.catImg1.replace(0xF, 15); // Black closed eyes
+			
+			this.catImg2 = this.catImg1.clone();
+			// Achatado (respirando fora)
+			this.catImg2 = img`
+				. . . . . . . . . .
+				. . . . . . . . . .
+				. . . e e e . . . .
+				. e e e e e e e . .
+				. e e f e e f e e .
+				. e e e e e e e e .
+				. . . e e e e . . .
+			`;
+			this.catImg2.replace(0xE, 12);
+			this.catImg2.replace(0xF, 15);
 		}
 
 		public enter(): void {
@@ -64,10 +108,8 @@ namespace Engine.Scenes {
 			let bg = image.create(screen.width, screen.height);
 			bg.fill(11); // Parede verde-oliva aconchegante (com a nova paleta)
 
-			// 1. A Janela para o Fim de Tarde
+			// 1. A Janela (Apenas o fundo do Céu azul acinzentado, o Sol e a moldura serão desenhados dinamicamente no onPaint)
 			bg.fillRect(56, 4, 48, 28, 8); // Fundo da janela (Céu azul acinzentado)
-			bg.fillRect(56, 20, 48, 12, 14); // Pôr do sol (Laranja suave)
-			bg.fillCircle(80, 24, 6, 6); // Sol se pondo (Creme/Amarelo)
 			// Caixilharia da janela e parapeito
 			bg.drawRect(55, 3, 50, 30, 2); 
 			bg.drawLine(80, 3, 80, 33, 2);
@@ -257,11 +299,50 @@ namespace Engine.Scenes {
 			game.onPaint(() => {
 				let time = game.runtime(); // O relógio interno do jogo (em milissegundos)
 
-				// EFEITO COZY: Partículas de poeira flutuando no ar (iluminadas pela janela)
-				for (let i = 0; i < 5; i++) {
-					let dustX = (time / 20 + i * 40) % screen.width;
-					let dustY = (Math.sin(time / 500 + i) * 10 + 30 + i * 15) % counterY;
-					screen.setPixel(dustX, dustY, 6); // Poeira dourada (cor 6)
+				// === ADVANCED VFX: Dynamic Sunset ===
+				let dayRatio = this.dayElapsedMs / this.dayDurationMs;
+				let sunY = 16 + (dayRatio * 12);
+				let sunColor = dayRatio > 0.8 ? 2 : (dayRatio > 0.5 ? 4 : 6);
+				// Céu
+				screen.fillRect(56, 4, 48, 28, 8); // Azul
+				// Por do sol subindo de baixo
+				screen.fillRect(56, 32 - (dayRatio * 12), 48, (dayRatio * 12), 14); 
+				// O Sol
+				screen.fillCircle(80, sunY, 6, sunColor); 
+				// Nuvens passando (Parallax fake)
+				let cloudX = 56 + ((time / 50) % 48);
+				screen.fillRect(cloudX, 10, 8, 3, 1);
+				screen.fillRect(cloudX + 2, 8, 5, 3, 1);
+				// Redesenha a janela por cima do sol
+				screen.drawRect(55, 3, 50, 30, 2); 
+				screen.drawLine(80, 3, 80, 33, 2);
+				screen.drawLine(55, 18, 105, 18, 2);
+
+				// === ADVANCED VFX: Wind Physics Dust ===
+				let baristaVx = (this.barista && this.barista.active) ? this.barista.sprite.vx : 0;
+				for (let i = 0; i < this.dustParticles.length; i++) {
+					let p = this.dustParticles[i];
+					// Barista wind influence
+					if (Math.abs(baristaVx) > 0 && p.y > counterY - 10 && p.y < counterY + 30) {
+						p.vx += (baristaVx * 0.005);
+					}
+					p.vx *= 0.95; // friction
+					p.x = (p.x + p.vx + screen.width) % screen.width;
+					p.y = p.y - p.vy;
+					if (p.y < 0) p.y = counterY + 20;
+					
+					screen.setPixel(p.x, p.y + Math.sin(time / 500 + i) * 3, 6); // Poeira dourada (cor 6)
+				}
+
+				// === MASCOTE: O Gato Dorminhoco ===
+				let catX = 135;
+				let catY = counterY - 15;
+				let isBreathingIn = (time % 3000) < 1500;
+				let currentCat = isBreathingIn ? this.catImg1 : this.catImg2;
+				screen.drawTransparentImage(currentCat, catX, catY);
+				// Zzz effect
+				if (isBreathingIn && (time % 3000) > 1000) {
+					screen.print("z", catX + 8, catY - 4 - ((time % 500) / 100), 1);
 				}
 
 				// PROFUNDIDADE: Sombra do Barista
@@ -300,10 +381,12 @@ namespace Engine.Scenes {
 						screen.drawLine(c.sprite.x - 5, c.sprite.y - 12, c.sprite.x + 5, c.sprite.y - 12, 1); // Fundo
 						screen.drawLine(c.sprite.x - 5, c.sprite.y - 12, c.sprite.x - 5 + barW, c.sprite.y - 12, barColor); // Barra
 						
-						// BALÃO DE PEDIDO (Aparece se o cliente chegou ao seu lugar)
+						// BALÃO DE PEDIDO COM ELASTICIDADE (Pop e Hover)
 						if (c.sprite.vx === 0) {
 							let bx = c.sprite.x + 4;
-							let by = c.sprite.y - 28;
+							let floatOffset = Math.sin(time / 150 + i) * 2; // Movimento suave contínuo
+							let by = c.sprite.y - 28 + floatOffset;
+							
 							// Fundo e borda do balão
 							screen.fillRect(bx, by, 18, 18, 1); // Branco
 							screen.drawRect(bx, by, 18, 18, 15); // Borda escura
@@ -392,6 +475,22 @@ namespace Engine.Scenes {
 					}
 				}
 
+				// === ADVANCED VFX: Floating Combat Text ===
+				for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
+					let ft = this.floatingTexts[i];
+					ft.life -= 30; // Approx dt decay
+					ft.y += (ft.vy * 0.03);
+					ft.vy *= 0.9; // friction
+					if (ft.life <= 0) {
+						this.floatingTexts.splice(i, 1);
+					} else {
+						// Pisca antes de sumir
+						if (ft.life > 300 || (time % 100 > 50)) {
+							screen.print(ft.text, ft.x, ft.y, 7); // Verde claro (cor 7)
+						}
+					}
+				}
+
 				// HUD: Money Box (Top-Left)
 				screen.fillRect(2, 2, 40, 9, 1);    // Moldura/fundo branco
 				screen.fillRect(3, 3, 38, 7, 15);   // Fundo preto
@@ -428,6 +527,16 @@ namespace Engine.Scenes {
 						if (methodMatch) {
 							let gain = 10 * closestCustomer.rewardMultiplier;
 							Engine.Core.TycoonState.money += gain;
+							
+							// Spawn Floating Combat Text (Juice)
+							this.floatingTexts.push({
+								text: "+$" + gain,
+								x: closestCustomer.sprite.x - 4,
+								y: closestCustomer.sprite.y - 15,
+								vy: -40,
+								life: 1000,
+								maxLife: 1000
+							});
 							
 							// Som clássico de "ba-ding"
 							music.playTone(523, 80);

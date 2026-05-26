@@ -111,8 +111,8 @@ namespace Engine.Entities {
 					if (ent === this) continue;
 
 					if (ent instanceof Station || ent instanceof CoffeeBag) {
-						const dx = Math.abs(this.sprite.x - ent.sprite.x);
-						const dy = Math.abs(this.sprite.y - ent.sprite.y);
+						const dx = Math.abs(this.sprite.x - ent.getSprite().x);
+						const dy = Math.abs(this.sprite.y - ent.getSprite().y);
 						const dist = dx + dy;
 						if (dist < minDistance) {
 							minDistance = dist;

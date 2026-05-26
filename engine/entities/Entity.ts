@@ -12,6 +12,11 @@ namespace Engine.Entities {
 			this.active = true;
 		}
 
+		/** Get the sprite of the entity. */
+		public getSprite(): Sprite {
+			return this.sprite;
+		}
+
 		// Método concreto, mas vazio. As classes filhas (Barista, Station) farão o override.
 		public update(dt: number): void {
 		}

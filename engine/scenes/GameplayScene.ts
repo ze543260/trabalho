@@ -73,7 +73,7 @@ namespace Engine.Scenes {
 
 			// Quadro de Menu na Parede (Esquerda)
 			bg.fillRect(8, 6, 36, 26, 15); // Preto/Cinza Escuro (cor 15)
-			bg.rect(8, 6, 36, 26, 1);      // Moldura branca (cor 1)
+			bg.drawRect(8, 6, 36, 26, 1);      // Moldura branca (cor 1)
 			bg.drawLine(12, 10, 24, 10, 4); // "MENU" em amarelo (cor 4)
 			bg.drawLine(12, 15, 36, 15, 1); // Itens do menu em branco
 			bg.drawLine(12, 19, 32, 19, 1);
@@ -81,7 +81,7 @@ namespace Engine.Scenes {
 
 			// Quadro de Café Decorativo na Parede (Direita)
 			bg.fillRect(124, 6, 24, 24, 11); // Fundo verde (cor 11)
-			bg.rect(124, 6, 24, 24, 12);     // Moldura marrom (cor 12)
+			bg.drawRect(124, 6, 24, 24, 12);     // Moldura marrom (cor 12)
 			// Desenha uma xícara simples no quadro
 			bg.fillRect(132, 18, 8, 6, 1);    // Xícara branca
 			bg.fillRect(140, 19, 2, 3, 1);    // Asa da xícara
@@ -106,7 +106,7 @@ namespace Engine.Scenes {
 
 			// Tapete vermelho na área de serviço do barista
 			bg.fillRect(16, counterY + 20, 128, 12, 2); // Tapete vermelho (cor 2)
-			bg.rect(16, counterY + 20, 128, 12, 4);     // Detalhe laranja (cor 4)
+			bg.drawRect(16, counterY + 20, 128, 12, 4);     // Detalhe laranja (cor 4)
 
 			// Define essa imagem pintada como o fundo imutável da cena
 			scene.setBackgroundImage(bg);

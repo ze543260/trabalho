@@ -18,7 +18,7 @@ namespace Engine.Core {
 
         game.onUpdate(function () {
             let now = control.millis();
-            deltaTime = (now - lastTime) / 1000.0;
+            deltaTime = now - lastTime;
             lastTime = now;
             updateInput();
             for (let cb of updateCallbacks) {

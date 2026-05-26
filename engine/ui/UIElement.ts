@@ -1,8 +1,9 @@
 namespace Engine.UI {
 	/**
 	 * Base class for UI elements that render to the screen.
+	 * REMOVIDO O 'abstract' para compatibilidade com C++ embarcado.
 	 */
-	export abstract class UIElement {
+	export class UIElement {
 		protected x: number;
 		protected y: number;
 		protected width: number;
@@ -25,8 +26,9 @@ namespace Engine.UI {
 		public update(dt: number): void {
 		}
 
-		/** Render element to the screen buffer. */
-		public abstract render(screen: Image): void;
+		/** Render element to the screen buffer. Corpo vazio para as filhas substituírem. */
+		public render(screen: Image): void {
+		}
 
 		public setPosition(x: number, y: number): void {
 			this.x = x;

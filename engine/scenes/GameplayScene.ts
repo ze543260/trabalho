@@ -83,7 +83,7 @@ namespace Engine.Scenes {
 						c.paciencia -= 1;
 						if (c.paciencia <= 0) {
 							c.sprite.destroy(); // Destrói visualmente
-							this.activeCustomers.splice(i, 1); // Remove da memória
+							this.activeCustomers.removeElement(c);
 						}
 					}
 				}

@@ -20,6 +20,7 @@ namespace Engine.Entities {
 		// Novas variáveis
 		private rightImg: Image;
 		private leftImg: Image;
+		private lastBobOffset: number;
 
 		constructor(sprite: Sprite, moveSpeed: number, counterY: number) {
 			super(sprite);
@@ -27,6 +28,7 @@ namespace Engine.Entities {
 			this.counterY = counterY;
 			this.blocksAboveCounter = true;
 			this.carryState = CarryType.None;
+			this.lastBobOffset = 0;
 			
 			// Cache visual
 			this.rightImg = sprite.image;
@@ -58,9 +60,13 @@ namespace Engine.Entities {
 		 * Reads input, updates velocity, and applies counter collision limit.
 		 */
 		public update(dt: number): void {
+			// Remove o bob anterior para evitar drift acumulado nas coordenadas
+			this.sprite.y += this.lastBobOffset;
+
 			if (!this.active) {
 				this.sprite.vx = 0;
 				this.sprite.vy = 0;
+				this.lastBobOffset = 0;
 				return;
 			}
 
@@ -107,6 +113,15 @@ namespace Engine.Entities {
 				this.sprite.setImage(this.leftImg);
 			} else if (vx > 0) {
 				this.sprite.setImage(this.rightImg);
+			}
+
+			// Animação de caminhada ("Bobbing" de 1 pixel sem alterar a imagem)
+			if (vx !== 0 || vy !== 0) {
+				let walkCycle = Math.floor(game.runtime() / 100) % 2;
+				this.lastBobOffset = (walkCycle === 0) ? 1 : 0;
+				this.sprite.y -= this.lastBobOffset;
+			} else {
+				this.lastBobOffset = 0;
 			}
 
 			if (Engine.Core.justPressed(Engine.Core.Action.Interact)) {

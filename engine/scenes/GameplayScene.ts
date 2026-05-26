@@ -62,14 +62,17 @@ namespace Engine.Scenes {
 
 			// --- NOVO: PINTANDO O CENÁRIO ESTÁTICO ---
 			let bg = image.create(screen.width, screen.height);
-			bg.fill(13); // Fundo rosa/bege claro da parede (cor 13)
+			bg.fill(11); // Parede verde-oliva aconchegante (com a nova paleta)
 
-			// Carimba o chão da metade da tela para baixo
-			for (let x = 0; x < screen.width; x += 16) {
-				for (let y = counterY - 8; y < screen.height; y += 16) {
-					bg.drawTransparentImage(Assets.floorTile, x, y);
-				}
-			}
+			// 1. A Janela para o Fim de Tarde
+			bg.fillRect(56, 4, 48, 28, 8); // Fundo da janela (Céu azul acinzentado)
+			bg.fillRect(56, 20, 48, 12, 14); // Pôr do sol (Laranja suave)
+			bg.fillCircle(80, 24, 6, 6); // Sol se pondo (Creme/Amarelo)
+			// Caixilharia da janela e parapeito
+			bg.drawRect(55, 3, 50, 30, 2); 
+			bg.drawLine(80, 3, 80, 33, 2);
+			bg.drawLine(55, 18, 105, 18, 2);
+			bg.fillRect(53, 33, 54, 3, 3); // Parapeito de madeira
 
 			// Quadro de Menu na Parede (Esquerda)
 			bg.fillRect(8, 6, 36, 26, 15); // Preto/Cinza Escuro (cor 15)
@@ -88,9 +91,24 @@ namespace Engine.Scenes {
 			bg.drawLine(134, 15, 134, 16, 4); // Fumacinha amarela
 			bg.drawLine(137, 14, 137, 16, 4);
 
-			// Círculo base do relógio na parede
-			bg.fillCircle(80, 16, 7, 1);      // Círculo branco
-			bg.drawCircle(80, 16, 7, 12);     // Moldura marrom
+			// Círculo base do relógio na parede (reposicionado)
+			bg.fillCircle(114, 16, 7, 1);      // Círculo branco
+			bg.drawCircle(114, 16, 7, 12);     // Moldura marrom
+
+			// 2. Chão de Madeira e Sombra
+			for (let x = 0; x < screen.width; x += 16) {
+				for (let y = counterY - 8; y < screen.height; y += 16) {
+					bg.drawTransparentImage(Assets.floorTile, x, y);
+				}
+			}
+			// Sombra projetada do balcão no chão (dá profundidade 3D)
+			bg.fillRect(0, counterY - 8, screen.width, 4, 1); 
+
+			// 3. Tapete da área de serviço (Mais detalhado e escuro)
+			bg.fillRect(16, counterY + 16, 128, 16, 9); // Tapete escuro (cor 9)
+			bg.drawRect(16, counterY + 16, 128, 16, 3); // Borda (cor 3)
+			bg.drawLine(20, counterY + 20, 140, counterY + 20, 3); // Padrão
+			bg.drawLine(20, counterY + 28, 140, counterY + 28, 3); // Padrão
 
 			// Plantas decorativas nos cantos inferiores (vasos de flor)
 			// Esquerda:
@@ -103,10 +121,6 @@ namespace Engine.Scenes {
 			bg.fillCircle(screen.width - 6, counterY - 2, 5, 7);
 			bg.fillCircle(screen.width - 9, counterY - 5, 4, 6);
 			bg.fillCircle(screen.width - 3, counterY - 5, 4, 6);
-
-			// Tapete vermelho no centro da área de serviço do barista
-			bg.fillRect(24, counterY + 8, 112, 16, 2); // Tapete vermelho (cor 2)
-			bg.drawRect(24, counterY + 8, 112, 16, 4);     // Detalhe laranja (cor 4)
 
 			// Balcão de trabalho inferior (onde ficam as máquinas e sacas)
 			bg.fillRect(16, screen.height - 24, 128, 24, 12); // Mesa de madeira marrom (cor 12)
@@ -206,37 +220,58 @@ namespace Engine.Scenes {
 				}
 			});
 
-			// 4. Desenho de UI seguro
+			// 4. Desenho de UI e Efeitos Visuais Cozy
 			game.onPaint(() => {
-				// Clientes e barras de paciência
+				let time = game.runtime(); // O relógio interno do jogo (em milissegundos)
+
+				// EFEITO COZY: Partículas de poeira flutuando no ar (iluminadas pela janela)
+				for (let i = 0; i < 5; i++) {
+					let dustX = (time / 20 + i * 40) % screen.width;
+					let dustY = (Math.sin(time / 500 + i) * 10 + 30 + i * 15) % counterY;
+					screen.setPixel(dustX, dustY, 6); // Poeira dourada (cor 6)
+				}
+
+				// Clientes, efeito de respiração e barras de paciência fofas
 				for (let i = 0; i < this.activeCustomers.length; i++) {
 					let c = this.activeCustomers[i];
 					let p = c.paciencia;
 					let maxP = c.pacienciaMax;
+
+					// Se o cliente está parado esperando, faz o efeito de respiração ("Bobbing")
+					if (c.sprite.vx === 0) {
+						c.sprite.y = this.queueY + Math.floor(Math.sin(time / 200 + i) * 2);
+					}
+
+					// Barras de paciência arredondadas e fofas
 					if (p > 0 && maxP > 0) {
 						let ratio = p / maxP;
 						if (ratio < 0) ratio = 0;
 						let barW = Math.floor(10 * ratio);
-						screen.fillRect(c.sprite.x - 5, c.sprite.y - 12, 10, 2, 1);
-						screen.fillRect(c.sprite.x - 5, c.sprite.y - 12, barW, 2, 7);
+						// Cor da paciência (Verde, muda para laranja, muda para vermelho)
+						let barColor = ratio > 0.5 ? 13 : (ratio > 0.25 ? 14 : 2);
+						
+						screen.drawLine(c.sprite.x - 5, c.sprite.y - 12, c.sprite.x + 5, c.sprite.y - 12, 1); // Fundo
+						screen.drawLine(c.sprite.x - 5, c.sprite.y - 12, c.sprite.x - 5 + barW, c.sprite.y - 12, barColor); // Barra
 					}
 				}
 
-				// Barra de progresso, luzes de estado e vapor nas máquinas de café
+				// Barra de progresso, luzes de estado e vapor detalhado nas máquinas de café
 				for (let i = 0; i < this.stations.length; i++) {
 					let station = this.stations[i];
 					let state = station.getState();
 					let sprite = station.sprite;
 
-					// Partículas de fumaça/vapor subindo
+					// Vapor mais gordinho e com fade-out gradual
 					if (state === Engine.Entities.BrewState.Processing || state === Engine.Entities.BrewState.Ready) {
-						let time = game.runtime();
-						for (let p = 0; p < 3; p++) {
-							let offset = (time + p * 300) % 900;
-							let py = sprite.y - 8 - Math.floor(offset / 60);
-							let px = sprite.x + Math.floor(Math.sin((time + p * 500) / 100) * 3);
-							if (py > sprite.y - 24) {
-								screen.setPixel(px, py, 1); // 1 = branco (cor do vapor)
+						for (let p = 0; p < 4; p++) {
+							let offset = (time + p * 250) % 1000;
+							let py = sprite.y - 8 - Math.floor(offset / 40); // Sobe suavemente
+							let px = sprite.x + Math.floor(Math.sin((time + p * 400) / 150) * 4); // Ziguezague maior
+							
+							let vaporColor = py > sprite.y - 16 ? 7 : 5; 
+							if (py > sprite.y - 28) {
+								screen.setPixel(px, py, vaporColor);
+								screen.setPixel(px + 1, py, vaporColor); // Vapor mais gordinho
 							}
 						}
 					}
@@ -266,13 +301,13 @@ namespace Engine.Scenes {
 					}
 				}
 
-				// Ponteiros do Relógio Ticking na parede
-				let sec = (game.runtime() / 1000) % 60;
+				// Ponteiros do Relógio Ticking na parede (movido para x=114, y=16)
+				let sec = (time / 1000) % 60;
 				let angle = (sec / 60) * 2 * Math.PI - Math.PI / 2;
-				let handX = 80 + Math.floor(Math.cos(angle) * 4);
+				let handX = 114 + Math.floor(Math.cos(angle) * 4);
 				let handY = 16 + Math.floor(Math.sin(angle) * 4);
-				screen.drawLine(80, 16, handX, handY, 2); // Ponteiro de segundos vermelho (cor 2)
-				screen.drawLine(80, 16, 80, 13, 15);     // Ponteiro de horas fixo/preto (cor 15)
+				screen.drawLine(114, 16, handX, handY, 2); // Ponteiro de segundos vermelho (cor 2)
+				screen.drawLine(114, 16, 114, 13, 15);     // Ponteiro de horas fixo/preto (cor 15)
 
 				// Item carregado pelo Barista (Balão flutuando acima da cabeça)
 				if (this.barista && this.barista.active) {

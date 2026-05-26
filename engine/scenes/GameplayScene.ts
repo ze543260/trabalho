@@ -1,17 +1,25 @@
 namespace Engine.Scenes {
-	// Estrutura estrita para o compilador C++ não travar
-	export class CustomerData {
-		public targetX: number = 0;
-		public paciencia: number = 0;
-		public pacienciaMax: number = 0;
-		public rewardMultiplier: number = 0;
-		public desiredBean: Engine.Entities.BeanType = Engine.Entities.BeanType.None;
-		public desiredMethod: Engine.Entities.BrewMethod = Engine.Entities.BrewMethod.Espresso;
+	// 1. Classe de Dados Estrita (O C++ ama isso)
+	export class CustomerRecord {
+		public sprite: Sprite;
+		public targetX: number;
+		public paciencia: number;
+		public pacienciaMax: number;
+		public rewardMultiplier: number;
+		public desiredBean: Engine.Entities.BeanType;
+		public desiredMethod: Engine.Entities.BrewMethod;
+
+		constructor(s: Sprite) {
+			this.sprite = s;
+			this.targetX = 0;
+			this.paciencia = 0;
+			this.pacienciaMax = 0;
+			this.rewardMultiplier = 0;
+			this.desiredBean = Engine.Entities.BeanType.None;
+			this.desiredMethod = Engine.Entities.BrewMethod.Espresso;
+		}
 	}
 
-	/**
-	 * Main gameplay scene that orchestrates entities and day flow.
-	 */
 	export class GameplayScene implements Scene {
 		private barista: Engine.Entities.Barista;
 		private stations: Engine.Entities.Station[] = [];
@@ -26,7 +34,9 @@ namespace Engine.Scenes {
 		private queueY: number = 0;
 		private dayEnded: boolean = false;
 
-		/** Initialize entities and systems for the day. */
+		// 2. A nossa lista segura de clientes ativos
+		private activeCustomers: CustomerRecord[] = [];
+
 		public enter(): void {
 			Engine.Entities.EntityManager.init(30);
 			Engine.FX.FXManager.init(30);
@@ -60,64 +70,52 @@ namespace Engine.Scenes {
 			this.spawnTimerMs = 0;
 			this.dayElapsedMs = 0;
 			this.dayEnded = false;
+			this.activeCustomers = []; // Reseta a lista a cada dia
 
-			// Phase 2: GameTick for Economy
+			// 3. Tick de Economia (Iterando na nossa lista segura)
 			game.onUpdateInterval(1000, () => {
 				if (this.dayEnded) return;
-                
-				let enemies = sprites.allOfKind(SpriteKind.Enemy);
-				for (let i = 0; i < enemies.length; i++) {
-					let s = enemies[i];
-					let cData = s.data as CustomerData; // Avisa o C++ o que é isso
-					if (cData && cData.paciencia > 0) {
-						cData.paciencia -= 1;
-						if (cData.paciencia <= 0) {
-							s.destroy(); // Vai embora com raiva
+				
+				// Loop reverso para podermos apagar clientes com segurança
+				for (let i = this.activeCustomers.length - 1; i >= 0; i--) {
+					let c = this.activeCustomers[i];
+					if (c.paciencia > 0) {
+						c.paciencia -= 1;
+						if (c.paciencia <= 0) {
+							c.sprite.destroy(); // Destrói visualmente
+							this.activeCustomers.splice(i, 1); // Remove da memória
 						}
 					}
 				}
 			});
 
-			// Phase 3: Optimize Progress Bars
+			// 4. Desenho de UI seguro
 			game.onPaint(() => {
-				let enemies = sprites.allOfKind(SpriteKind.Enemy);
-				for (let i = 0; i < enemies.length; i++) {
-					let s = enemies[i];
-					let cData = s.data as CustomerData;
-					if (cData) {
-						let p = cData.paciencia;
-						let maxP = cData.pacienciaMax;
-						if (p > 0 && maxP > 0) {
-							let ratio = p / maxP;
-							if (ratio < 0) ratio = 0;
-							let barW = Math.floor(10 * ratio);
-							screen.fillRect(s.x - 5, s.y - 12, 10, 2, 1); // Fundo
-							screen.fillRect(s.x - 5, s.y - 12, barW, 2, 7); // Barra
-						}
+				for (let i = 0; i < this.activeCustomers.length; i++) {
+					let c = this.activeCustomers[i];
+					let p = c.paciencia;
+					let maxP = c.pacienciaMax;
+					if (p > 0 && maxP > 0) {
+						let ratio = p / maxP;
+						if (ratio < 0) ratio = 0;
+						let barW = Math.floor(10 * ratio);
+						screen.fillRect(c.sprite.x - 5, c.sprite.y - 12, 10, 2, 1);
+						screen.fillRect(c.sprite.x - 5, c.sprite.y - 12, barW, 2, 7);
 					}
 				}
 			});
-
-			// Phase 1: Colisoes nativas (exemplo: bate na "parede" invisivel do balcao/fila)
-			// (se tivessemos tilemap usariamos scene.onHitWall aqui, por hora assumimos que param)
 		}
 
-		/** Update systems, entities, and day clock. */
 		public update(dt: number): void {
 			Engine.Entities.EntityManager.update(dt);
 			Engine.FX.FXManager.update(dt);
 
-			// Para clientes no alvo (Loop C++ Friendly)
-			let enemies = sprites.allOfKind(SpriteKind.Enemy);
-			for (let i = 0; i < enemies.length; i++) {
-				let s = enemies[i];
-				let cData = s.data as CustomerData;
-				if (cData) {
-					let tx = cData.targetX;
-					if (s.vx < 0 && s.x <= tx) {
-						s.x = tx;
-						s.vx = 0;
-					}
+			// 5. Atualização de Posição
+			for (let i = 0; i < this.activeCustomers.length; i++) {
+				let c = this.activeCustomers[i];
+				if (c.sprite.vx < 0 && c.sprite.x <= c.targetX) {
+					c.sprite.x = c.targetX;
+					c.sprite.vx = 0;
 				}
 			}
 
@@ -125,20 +123,15 @@ namespace Engine.Scenes {
 			this.updateDayClock(dt);
 		}
 
-		/** Cleanup when leaving the scene. */
 		public exit(): void {
 			Engine.UI.UIManager.clear();
 		}
 
 		private updateSpawn(dt: number): void {
-			if (this.dayEnded) {
-				return;
-			}
+			if (this.dayEnded) return;
 
 			this.spawnTimerMs += dt;
-			if (this.spawnTimerMs < this.spawnIntervalMs) {
-				return;
-			}
+			if (this.spawnTimerMs < this.spawnIntervalMs) return;
 
 			this.spawnTimerMs -= this.spawnIntervalMs;
 			this.spawnCustomer();
@@ -156,44 +149,34 @@ namespace Engine.Scenes {
 			const sprite = sprites.create(Assets.customerBase, SpriteKind.Enemy);
 			sprite.x = spawnX;
 			sprite.y = targetY;
-
-			// Phase 1: Velocidade nativa
 			sprite.vx = -30;
-            
-			// Cria o pacote de dados ESTRITO
-			let cData = new CustomerData();
+
+			// 6. Criamos e adicionamos à nossa lista em vez do sprite.data
+			let cData = new CustomerRecord(sprite);
 			cData.targetX = targetX;
 
-			// Configurando cliente
 			if (randint(0, 4) === 0) {
-				// CoffeeSnob
 				cData.paciencia = 40;
 				cData.pacienciaMax = 40;
 				cData.rewardMultiplier = 3;
 				cData.desiredBean = Engine.Entities.BeanType.Mantiqueira;
 				cData.desiredMethod = Engine.Entities.BrewMethod.V60;
 			} else {
-				// RushedStudent
 				cData.paciencia = 10;
 				cData.pacienciaMax = 10;
 				cData.rewardMultiplier = 1;
 				cData.desiredMethod = randint(0, 1) === 0 ? Engine.Entities.BrewMethod.Espresso : Engine.Entities.BrewMethod.Capsule;
 				cData.desiredBean = randint(0, 1) === 0 ? Engine.Entities.BeanType.Mantiqueira : Engine.Entities.BeanType.Colombia;
 			}
-            
-			// Acopla ao nativo com segurança
-			sprite.data = cData;
+
+			this.activeCustomers.push(cData);
 		}
 
 		private updateDayClock(dt: number): void {
-			if (this.dayEnded) {
-				return;
-			}
+			if (this.dayEnded) return;
 
 			this.dayElapsedMs += dt;
-			if (this.dayElapsedMs < this.dayDurationMs) {
-				return;
-			}
+			if (this.dayElapsedMs < this.dayDurationMs) return;
 
 			this.dayElapsedMs = this.dayDurationMs;
 			this.dayEnded = true;

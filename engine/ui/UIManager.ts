@@ -15,6 +15,14 @@ namespace Engine.UI {
 			this.elements.push(element);
 		}
 
+		/** Remove an element from the manager. */
+		public static remove(element: UIElement): void {
+			const index = this.elements.indexOf(element);
+			if (index >= 0) {
+				this.elements.splice(index, 1);
+			}
+		}
+
 		/** Clear all managed elements. */
 		public static clear(): void {
 			if (this.elements.length > 0) {

@@ -50,12 +50,54 @@ namespace Engine.Scenes {
 			this.spawnTimerMs = 0;
 			this.dayElapsedMs = 0;
 			this.dayEnded = false;
+
+			// Phase 2: GameTick for Economy
+			game.onUpdateInterval(1000, () => {
+				if (this.dayEnded) return;
+                // Exemplo de deducoes e verificacao de paciencia
+                for (let s of sprites.allOfKind(SpriteKind.Enemy)) {
+                    let p = sprites.readDataNumber(s, "paciencia");
+                    if (p > 0) {
+                        sprites.setDataNumber(s, "paciencia", p - 1);
+                        if (p - 1 <= 0) {
+                            s.destroy(); // Vai embora com raiva
+                        }
+                    }
+                }
+			});
+
+			// Phase 3: Optimize Progress Bars
+			game.onPaint(() => {
+				for (let s of sprites.allOfKind(SpriteKind.Enemy)) {
+                    let p = sprites.readDataNumber(s, "paciencia");
+                    let maxP = sprites.readDataNumber(s, "pacienciaMax");
+                    if (p > 0 && maxP > 0) {
+                        let ratio = p / maxP;
+                        if (ratio < 0) ratio = 0;
+                        let barW = Math.floor(10 * ratio);
+                        screen.fillRect(s.x - 5, s.y - 12, 10, 2, 1); // Fundo
+                        screen.fillRect(s.x - 5, s.y - 12, barW, 2, 7); // Barra
+                    }
+				}
+			});
+
+			// Phase 1: Colisoes nativas (exemplo: bate na "parede" invisivel do balcao/fila)
+			// (se tivessemos tilemap usariamos scene.onHitWall aqui, por hora assumimos que param)
 		}
 
 		/** Update systems, entities, and day clock. */
 		public update(dt: number): void {
 			Engine.Entities.EntityManager.update(dt);
 			Engine.FX.FXManager.update(dt);
+
+			// Para clientes no alvo
+			for (let s of sprites.allOfKind(SpriteKind.Enemy)) {
+				let tx = sprites.readDataNumber(s, "targetX");
+				if (s.vx < 0 && s.x <= tx) {
+					s.x = tx;
+					s.vx = 0;
+				}
+			}
 
 			this.updateSpawn(dt);
 			this.updateDayClock(dt);
@@ -93,14 +135,28 @@ namespace Engine.Scenes {
 			sprite.x = spawnX;
 			sprite.y = targetY;
 
-			let customer: Engine.Entities.Customer;
-			if (randint(0, 4) === 0) {
-				customer = new Engine.Entities.CoffeeSnob(sprite, targetX, targetY);
-			} else {
-				customer = new Engine.Entities.RushedStudent(sprite, targetX, targetY);
-			}
+			// Phase 1: Velocidade nativa
+			sprite.vx = -30;
+			sprites.setDataNumber(sprite, "targetX", targetX);
 
-			Engine.Entities.EntityManager.add(customer);
+			// Configurando cliente de forma Data-Driven
+			if (randint(0, 4) === 0) {
+				// CoffeeSnob
+				sprites.setDataNumber(sprite, "paciencia", 40);
+				sprites.setDataNumber(sprite, "pacienciaMax", 40);
+				sprites.setDataNumber(sprite, "rewardMultiplier", 3);
+				sprites.setDataNumber(sprite, "desiredBean", Engine.Entities.BeanType.Mantiqueira);
+				sprites.setDataNumber(sprite, "desiredMethod", Engine.Entities.BrewMethod.V60);
+			} else {
+				// RushedStudent
+				sprites.setDataNumber(sprite, "paciencia", 10);
+				sprites.setDataNumber(sprite, "pacienciaMax", 10);
+				sprites.setDataNumber(sprite, "rewardMultiplier", 1);
+				const method = randint(0, 1) === 0 ? Engine.Entities.BrewMethod.Espresso : Engine.Entities.BrewMethod.Capsule;
+				const bean = randint(0, 1) === 0 ? Engine.Entities.BeanType.Mantiqueira : Engine.Entities.BeanType.Colombia;
+				sprites.setDataNumber(sprite, "desiredBean", bean);
+				sprites.setDataNumber(sprite, "desiredMethod", method);
+			}
 		}
 
 		private updateDayClock(dt: number): void {

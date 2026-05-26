@@ -58,7 +58,7 @@ namespace Engine.Core {
         if (spritePool[kind].length > 0) {
             const s = spritePool[kind].pop();
             if (s) {
-                s.setImage(img.clone());
+                s.setImage(img);
                 s.setFlag(SpriteFlag.Invisible, false);
                 s.setFlag(SpriteFlag.Ghost, false);
                 s.vx = 0;
@@ -67,7 +67,7 @@ namespace Engine.Core {
             }
         }
 
-        return sprites.create(img.clone(), kind);
+        return sprites.create(img, kind);
     }
 
     export function freeSprite(s: Sprite) {

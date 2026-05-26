@@ -52,16 +52,21 @@ namespace Engine.Core {
     }
 
     export function allocSprite(img: Image, kind: number): Sprite {
-        if (!spritePool[kind]) spritePool[kind] = [];
-        if (spritePool[kind].length > 0) {
-            let s = spritePool[kind].pop();
-            s.setImage(img.clone());
-            s.setFlag(SpriteFlag.Invisible, false);
-            s.setFlag(SpriteFlag.Ghost, false);
-            s.vx = 0;
-            s.vy = 0;
-            return s;
+        if (!spritePool[kind]) {
+            spritePool[kind] = [];
         }
+        if (spritePool[kind].length > 0) {
+            const s = spritePool[kind].pop();
+            if (s) {
+                s.setImage(img.clone());
+                s.setFlag(SpriteFlag.Invisible, false);
+                s.setFlag(SpriteFlag.Ghost, false);
+                s.vx = 0;
+                s.vy = 0;
+                return s;
+            }
+        }
+
         return sprites.create(img.clone(), kind);
     }
 

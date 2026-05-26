@@ -131,4 +131,42 @@ namespace Assets {
         f f f f f f f f f f f f f f f f
         f f f f f f f f f f f f f f f f
     `;
+
+    export const beanBagMantiqueira = img`
+        . . f f f f f f f f f f f . . .
+        . f d d d d d d d d d d d f . .
+        f d d e d d d d d d d e d d f .
+        f d e e e e e e e e e e e d f .
+        f d e e e e e e e e e e e d f .
+        f d e e 6 6 6 6 6 6 6 e e d f .
+        f d e e 6 1 1 1 1 1 6 e e d f .
+        f d e e 6 1 1 1 1 1 6 e e d f .
+        f d e e 6 6 6 6 6 6 6 e e d f .
+        f d e e e e e e e e e e e d f .
+        f d e e e e e e e e e e e d f .
+        f d e e e e e e e e e e e d f .
+        f d d e d d d d d d d e d d f .
+        . f d d d d d d d d d d d f . .
+        . . f f f f f f f f f f f . . .
+        . . . . . . . . . . . . . . . .
+    `;
+
+    export const beanBagColombian = img`
+        . . f f f f f f f f f f f . . .
+        . f d d d d d d d d d d d f . .
+        f d d e d d d d d d d e d d f .
+        f d e e e e e e e e e e e d f .
+        f d e e e e e e e e e e e d f .
+        f d e e 2 4 4 4 4 4 2 e e d f .
+        f d e e 4 1 1 1 1 1 4 e e d f .
+        f d e e 4 1 1 1 1 1 4 e e d f .
+        f d e e 2 4 4 4 4 4 2 e e d f .
+        f d e e e e e e e e e e e d f .
+        f d e e e e e e e e e e e d f .
+        f d e e e e e e e e e e e d f .
+        f d d e d d d d d d d e d d f .
+        . f d d d d d d d d d d d f . .
+        . . f f f f f f f f f f f . . .
+        . . . . . . . . . . . . . . . .
+    `;
 }

@@ -1,172 +1,172 @@
 namespace Assets {
     export const baristaBase = img`
-        . . . . . 1 1 1 1 1 1 . . . . .
-        . . . . 1 2 2 2 2 2 2 1 . . . .
-        . . . 1 2 2 5 5 5 5 2 2 1 . . .
-        . . . 1 1 5 1 5 5 1 5 1 1 . . .
-        . . . 1 5 5 5 5 5 5 5 5 1 . . .
-        . . . . 1 5 5 5 5 5 5 1 . . . .
-        . . . . 1 1 1 1 1 1 1 1 . . . .
-        . . . 1 3 3 3 3 3 3 3 3 1 . . .
-        . . 1 5 3 6 6 6 6 6 6 3 5 1 . .
-        . . 1 5 3 6 6 6 6 6 6 3 5 1 . .
-        . . 1 1 1 6 6 6 6 6 6 1 1 1 . .
-        . . . . 1 6 6 6 6 6 6 1 . . . .
-        . . . . 1 6 6 6 1 6 6 6 1 . . .
-        . . . . 1 8 8 8 1 8 8 8 1 . . .
-        . . . 1 1 1 1 . . 1 1 1 1 . . .
+        . . . . f f f f f . . . . . . .
+        . . . f f f f f f f . . . . . .
+        . . f f f 5 5 5 5 f . . . . . .
+        . . f f 5 5 5 5 5 5 . . . . . .
+        . . f f 5 5 5 5 5 5 . . . . . .
+        . . . . 7 7 7 7 7 7 . . . . . .
+        . . . . 7 c c c c 7 . . . . . .
+        . . . 7 c c c c c c 7 . . . . .
+        . . . 5 c c c c c c 5 . . . . .
+        . . . 5 c c c c c c 5 . . . . .
+        . . . . c c c c c c . . . . . .
+        . . . . c c c c c c . . . . . .
+        . . . . c c c c c c . . . . . .
+        . . . . a a . . a a . . . . . .
+        . . . a a a . . a a a . . . . .
         . . . . . . . . . . . . . . . .
     `;
 
     export const customerBase = img`
-        . . . . . 1 1 1 1 . . . . . . .
-        . . . . 1 1 1 1 1 1 . . . . . .
-        . . . . 1 5 5 5 5 1 . . . . . .
-        . . . . 1 5 5 5 5 1 . . . . . .
-        . . . . . 1 5 5 1 . . . . . . .
-        . . . . . 4 4 4 4 . . . . . . .
-        . . . . 4 4 4 4 4 4 . . . . . .
-        . . . 4 4 4 4 4 4 4 4 . . . . .
-        . . . 4 4 4 4 4 4 4 4 . . . . .
-        . . . 4 4 4 4 4 4 4 4 . . . . .
-        . . . . 4 4 4 4 4 4 . . . . . .
-        . . . . 4 4 . . 4 4 . . . . . .
-        . . . . 4 4 . . 4 4 . . . . . .
-        . . . . 4 4 . . 4 4 . . . . . .
-        . . . . 1 1 . . 1 1 . . . . . .
+        . . . . . 2 2 2 2 2 . . . . . .
+        . . . . 2 2 3 3 2 2 2 . . . . .
+        . . . . 2 5 5 5 5 2 2 . . . . .
+        . . . . . 5 5 5 5 5 . . . . . .
+        . . . . . 5 5 5 5 5 . . . . . .
+        . . . . 4 4 4 4 4 4 4 . . . . .
+        . . . 4 4 e 4 4 4 e 4 4 . . . .
+        . . . 4 4 e 4 4 4 e 4 4 . . . .
+        . . . 5 4 e e e e e 4 5 . . . .
+        . . . 5 4 e e e e e 4 5 . . . .
+        . . . . 4 4 4 4 4 4 4 . . . . .
+        . . . . 4 4 4 4 4 4 4 . . . . .
+        . . . . 4 4 4 4 4 4 4 . . . . .
+        . . . . a a . . . a a . . . . .
+        . . . a a a . . . a a a . . . .
         . . . . . . . . . . . . . . . .
     `;
 
     export const grinder = img`
-        . . . f f f f f f f f f . . . .
-        . . f 9 9 9 9 9 9 9 9 9 f . . .
-        . . f 9 1 9 9 9 9 9 1 9 f . . .
-        . . f 9 9 9 6 6 9 9 9 9 f . . .
-        . . f 9 9 9 6 6 9 9 9 9 f . . .
-        . . f 9 9 9 9 9 9 9 9 9 f . . .
-        . . . f f f f f f f f f . . . .
-        . f e e e e e e e e e e e f . .
-        . f e 1 e e e e e e e 1 e f . .
-        . f e e e e e e e e e e e f . .
-        . f e e e e e e e e e e e f . .
-        . f e e 1 1 e e 1 1 e e e f . .
-        . f e e e e e e e e e e e f . .
-        . . f e e e e e e e e e f . . .
-        . . . f f 5 5 5 5 5 f f . . . .
-        . . . . f f f f f f f . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . 7 7 7 7 7 . . . . . .
+        . . . . 7 8 1 2 1 8 7 . . . . .
+        . . . . 8 1 2 1 1 2 8 . . . . .
+        . . . . 8 2 1 2 1 1 8 . . . . .
+        . . . . 8 8 1 1 2 8 8 . . . . .
+        . . . . . 8 8 8 8 8 . . . . . .
+        . . . . . 9 9 9 9 9 . . . . . .
+        . . . . 9 9 9 9 9 9 9 . . . . .
+        . . . . 9 a a a a a 9 . . . . .
+        . . . . 9 9 9 9 9 9 9 . . . . .
+        . . . 9 9 9 9 a 9 9 9 9 . . . .
+        . . . 9 9 9 9 a 9 9 9 9 . . . .
+        . . . 9 a 9 9 a 9 9 a 9 . . . .
+        . . . a a a a a a a a a . . . .
+        . . . . . . . . . . . . . . . .
     `;
 
     export const espresso = img`
-        f f f f f f f f f f f f f f f f
-        f 1 1 1 1 1 1 1 1 1 1 1 1 1 1 f
-        f 1 6 6 6 1 1 6 6 6 1 1 a a 1 f
-        f 1 6 9 6 1 1 6 9 6 1 1 a a 1 f
-        f 1 6 6 6 1 1 6 6 6 1 1 a a 1 f
-        f 1 1 1 1 1 1 1 1 1 1 1 a a 1 f
-        f f f f f f f f f f f f f f f f
-        f e e e e e e e e e e e e e e f
-        f e e 1 1 e e e e 1 1 e e e e f
-        f e 1 1 1 1 e e 1 1 1 1 e e e f
-        f e 1 1 1 1 e e 1 1 1 1 e e e f
-        f e e 1 1 e e e e 1 1 e e e e f
-        f e e e e e e e e e e e e e e f
-        f e e 5 5 5 5 5 5 5 5 e e e e f
-        f e e 5 5 5 5 5 5 5 5 e e e e f
-        f f f f f f f f f f f f f f f f
+        . . . . . . . . . . . . . . . .
+        . . 9 9 9 9 9 9 9 9 9 9 9 9 . .
+        . 9 8 8 8 8 8 8 8 8 8 8 8 8 9 .
+        . 9 8 e e 8 8 8 8 e e 8 8 8 9 .
+        . 9 8 2 2 8 8 8 8 2 2 8 8 8 9 .
+        . 9 9 9 9 9 9 9 9 9 9 9 9 9 9 .
+        . . 9 a 9 9 9 9 9 9 a 9 9 9 . .
+        . . 9 a 1 1 9 9 9 1 1 a 9 9 . .
+        . . 9 a . 1 9 9 9 1 . a 9 9 . .
+        . . 9 a . 1 9 9 9 1 . a 9 9 . .
+        . . 9 9 . . 9 9 9 . . 9 9 9 . .
+        . . 9 9 . 7 7 9 7 7 . 9 9 9 . .
+        . . 9 9 . 7 7 9 7 7 . 9 9 9 . .
+        . 9 9 9 9 9 9 9 9 9 9 9 9 9 9 .
+        . a a a a a a a a a a a a a a .
+        . . . . . . . . . . . . . . . .
     `;
 
     export const v60 = img`
-        . . . . f f f f f f f . . . . .
-        . . . f 9 9 9 9 9 9 9 f . . . .
-        . . . f 9 1 9 9 9 1 9 f . . . .
-        . . . . f 9 9 9 9 9 f . . . . .
-        . . . . . f 9 9 9 f . . . . . .
-        . . . . . . f 5 f . . . . . . .
-        . . . . . . . f . . . . . . . .
-        . . . . f f f f f f f . . . . .
-        . . . f 9 9 9 9 9 9 9 f . . . .
-        . . . f 9 1 9 9 9 1 9 f . . . .
-        . . . f 9 9 9 9 9 9 9 f . . . .
-        . . . f 1 9 9 9 9 9 1 f . . . .
-        . . . f 9 9 9 9 9 9 9 f . . . .
-        . . . . f f 9 9 9 f f . . . . .
-        . . . . . f f f f f . . . . . .
+        . . . . . . 6 . 6 . . . . . . .
+        . . . . . . . 6 . . . . . . . .
+        . . . . 7 7 7 7 7 7 7 . . . . .
+        . . . . . 7 7 7 7 7 . . . . . .
+        . . . . . . 7 7 7 . . . . . . .
+        . . . . . . 1 1 1 . . . . . . .
+        . . . . . 4 4 4 4 4 . . . . . .
+        . . . . . e e e e e . . . . . .
+        . . . . . 8 8 8 8 8 . . . . . .
+        . . . . 8 8 8 8 8 8 8 . . 9 . .
+        . . . 8 8 8 1 1 1 8 8 8 9 9 . .
+        . . . 8 8 1 1 1 1 1 8 8 9 . . .
+        . . . 8 8 1 1 1 1 1 8 8 . . . .
+        . . . . 8 8 8 8 8 8 8 . . . . .
+        . . . . . 7 7 7 7 7 . . . . . .
         . . . . . . . . . . . . . . . .
     `;
 
     export const floorTile = img`
-        d d d d d d d d d d f d d d d d
-        e e e e e e e e e e f e e e e e
-        e e e e e e e e e e f e e e e e
+        4 4 4 4 4 4 4 4 f 4 4 4 4 4 4 4
+        4 e e 4 4 e 4 4 f 4 e e 4 e 4 4
+        4 4 4 4 4 4 4 4 f 4 4 4 4 4 4 4
+        4 4 4 e 4 4 4 4 f 4 4 4 e 4 4 4
+        4 4 4 4 4 4 e 4 f 4 e 4 4 4 e 4
         f f f f f f f f f f f f f f f f
-        d d d d d f d d d d d d d d d d
-        e e e e e f e e e e e e e e e e
-        e e e e e f e e e e e e e e e e
+        4 4 4 f 4 4 4 4 4 4 4 4 4 e 4 4
+        e 4 4 f 4 e 4 4 e 4 4 4 4 4 4 4
+        4 4 4 f 4 4 4 4 4 4 4 e 4 4 4 4
+        4 e 4 f 4 4 e 4 4 4 4 4 4 4 4 e
+        4 4 4 f 4 4 4 4 4 4 e 4 4 4 4 4
         f f f f f f f f f f f f f f f f
-        d d d d d d d d d d d d f d d d
-        e e e e e e e e e e e e f e e e
-        e e e e e e e e e e e e f e e e
-        f f f f f f f f f f f f f f f f
-        d d d d d d d f d d d d d d d d
-        e e e e e e e f e e e e e e e e
-        e e e e e e e f e e e e e e e e
+        4 4 4 4 4 4 4 e 4 4 f 4 4 4 4 4
+        e 4 4 e 4 4 4 4 4 4 f 4 4 e 4 4
+        4 4 4 4 4 4 4 4 4 e f 4 4 4 4 4
         f f f f f f f f f f f f f f f f
     `;
 
     export const counterTile = img`
-        e e e e e e e e e e e e e e e e
-        e d d d d d d e e d d d d d d e
-        e d e e e e d e e d e e e e d e
-        e d e e e e d e e d e e e e d e
-        e d e e e e d e e d e e e e d e
-        e d e e e e d e e d e e e e d e
-        e d e e e e d e e d e e e e d e
-        e d e e e e d e e d e e e e d e
-        e d e e e e d e e d e e e e d e
-        e d e e e e d e e d e e e e d e
-        e d e e e e d e e d e e e e d e
-        e d d d d d d e e d d d d d d e
-        e e e e e e e e e e e e e e e e
-        e e e e e e e e e e e e e e e e
+        7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7
+        6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6
+        7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7
         f f f f f f f f f f f f f f f f
+        f 4 4 f 4 4 4 4 4 4 4 4 f 4 4 f
+        f 4 4 f 4 4 4 4 4 4 4 4 f 4 4 f
+        f 4 4 f 4 4 e e e e 4 4 f 4 4 f
+        f 4 4 f 4 4 e 4 4 e 4 4 f 4 4 f
+        f 4 4 f 4 4 e 4 4 e 4 4 f 4 4 f
+        f 4 4 f 4 4 e e e e 4 4 f 4 4 f
+        f 4 4 f 4 4 4 4 4 4 4 4 f 4 4 f
+        f 4 4 f 4 4 4 4 4 4 4 4 f 4 4 f
         f f f f f f f f f f f f f f f f
+        a a a a a a a a a a a a a a a a
+        a a a a a a a a a a a a a a a a
+        a a a a a a a a a a a a a a a a
     `;
 
     export const beanBagMantiqueira = img`
-        . . f f f f f f f f f f f . . .
-        . f d d d d d d d d d d d f . .
-        f d d e d d d d d d d e d d f .
-        f d e e e e e e e e e e e d f .
-        f d e e e e e e e e e e e d f .
-        f d e e 6 6 6 6 6 6 6 e e d f .
-        f d e e 6 1 1 1 1 1 6 e e d f .
-        f d e e 6 1 1 1 1 1 6 e e d f .
-        f d e e 6 6 6 6 6 6 6 e e d f .
-        f d e e e e e e e e e e e d f .
-        f d e e e e e e e e e e e d f .
-        f d e e e e e e e e e e e d f .
-        f d d e d d d d d d d e d d f .
-        . f d d d d d d d d d d d f . .
-        . . f f f f f f f f f f f . . .
         . . . . . . . . . . . . . . . .
+        . . . . . f f f f f . . . . . .
+        . . . . f e e e e e f . . . . .
+        . . . f e 4 4 4 4 4 e f . . . .
+        . . . . f a a a a a f . . . . .
+        . . . f 4 e e e e e 4 f . . . .
+        . . f 4 e e e e e e e 4 f . . .
+        . . f 4 e b b b b b e 4 f . . .
+        . f 4 e e b c c c b e e 4 f . .
+        . f 4 e e b c 7 c b e e 4 f . .
+        . f 4 e e b c c c b e e 4 f . .
+        . f 4 e e b b b b b e e 4 f . .
+        . f 4 e e e e e e e e e 4 f . .
+        . f 4 4 e e e e e e e 4 4 f . .
+        . . f f 4 4 4 4 4 4 4 f f . . .
+        . . . . f f f f f f f . . . . .
     `;
 
     export const beanBagColombian = img`
-        . . f f f f f f f f f f f . . .
-        . f d d d d d d d d d d d f . .
-        f d d e d d d d d d d e d d f .
-        f d e e e e e e e e e e e d f .
-        f d e e e e e e e e e e e d f .
-        f d e e 2 4 4 4 4 4 2 e e d f .
-        f d e e 4 1 1 1 1 1 4 e e d f .
-        f d e e 4 1 1 1 1 1 4 e e d f .
-        f d e e 2 4 4 4 4 4 2 e e d f .
-        f d e e e e e e e e e e e d f .
-        f d e e e e e e e e e e e d f .
-        f d e e e e e e e e e e e d f .
-        f d d e d d d d d d d e d d f .
-        . f d d d d d d d d d d d f . .
-        . . f f f f f f f f f f f . . .
         . . . . . . . . . . . . . . . .
+        . . . . . f f f f f . . . . . .
+        . . . . f e e e e e f . . . . .
+        . . . f e 4 4 4 4 4 e f . . . .
+        . . . . f a a a a a f . . . . .
+        . . . f 4 e e e e e 4 f . . . .
+        . . f 4 e e e e e e e 4 f . . .
+        . . f 4 e 2 2 2 2 2 e 4 f . . .
+        . f 4 e e 2 3 3 3 2 e e 4 f . .
+        . f 4 e e 2 3 7 3 2 e e 4 f . .
+        . f 4 e e 2 3 3 3 2 e e 4 f . .
+        . f 4 e e 2 2 2 2 2 e e 4 f . .
+        . f 4 e e e e e e e e e 4 f . .
+        . f 4 4 e e e e e e e 4 4 f . .
+        . . f f 4 4 4 4 4 4 4 f f . . .
+        . . . . f f f f f f f . . . . .
     `;
 }

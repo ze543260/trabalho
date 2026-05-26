@@ -140,7 +140,19 @@ namespace Engine.Scenes {
 
 			// Define essa imagem pintada como o fundo imutável da cena
 			scene.setBackgroundImage(bg);
+
+			// --- NOVO: SISTEMA DE ILUMINAÇÃO (Sunbeams / Raios de Sol) ---
+			// Desenhamos raios de luz na parede e no chão (cor 4 amarela suave e 6 dourada)
+			bg.drawLine(80, 20, 0, screen.height, 4);
+			bg.drawLine(85, 20, 20, screen.height, 6);
+			bg.drawLine(90, 20, 40, screen.height, 4);
+			bg.drawLine(75, 20, 0, screen.height - 20, 6);
 			// -----------------------------------------
+
+			// --- NOVO: SOUNDTRACK COZY LOFI ---
+			// Toca uma melodia relaxante em loop no fundo (BPM 100)
+			music.playMelody("E B C5 A B G A F ", 100);
+			// -----------------------------------
 
 			// --- NOVO: PRÉ-FABRICANDO ROUPAS ---
 			this.customerWardrobe = [];
@@ -170,7 +182,7 @@ namespace Engine.Scenes {
 			const baristaSprite = sprites.create(Assets.baristaBase, SpriteKind.Player);
 			baristaSprite.x = 80;
 			baristaSprite.y = counterY + 12; // Começa no meio do corredor
-			baristaSprite.z = 10; // Barista à frente do balcão
+			baristaSprite.z = 10; // Barista à frente do balcão superior
 			this.barista = new Engine.Entities.Barista(baristaSprite, 50, counterY);
 			Engine.Entities.EntityManager.add(this.barista);
 
@@ -178,7 +190,7 @@ namespace Engine.Scenes {
 			const espressoSprite = sprites.create(Assets.espresso, SpriteKind.Food);
 			espressoSprite.x = 32;
 			espressoSprite.y = screen.height - 16; // Mesa inferior
-			espressoSprite.z = 8;
+			espressoSprite.z = 15; // Z maior que o barista para dar a ilusão de profundidade e ficar na frente
 			const espressoStation = new Engine.Entities.Station(espressoSprite, Engine.Entities.BrewMethod.Espresso);
 			this.stations.push(espressoStation);
 			Engine.Entities.EntityManager.add(espressoStation);
@@ -186,7 +198,7 @@ namespace Engine.Scenes {
 			const v60Sprite = sprites.create(Assets.v60, SpriteKind.Food);
 			v60Sprite.x = 64;
 			v60Sprite.y = screen.height - 16; // Mesa inferior
-			v60Sprite.z = 8;
+			v60Sprite.z = 15;
 			const v60Station = new Engine.Entities.Station(v60Sprite, Engine.Entities.BrewMethod.V60);
 			this.stations.push(v60Station);
 			Engine.Entities.EntityManager.add(v60Station);
@@ -195,19 +207,19 @@ namespace Engine.Scenes {
 			const bagMantiqueiraSprite = sprites.create(Assets.beanBagMantiqueira, SpriteKind.Food);
 			bagMantiqueiraSprite.x = 96;
 			bagMantiqueiraSprite.y = screen.height - 16;
-			bagMantiqueiraSprite.z = 8;
+			bagMantiqueiraSprite.z = 15;
 			const bagMantiqueira = new Engine.Entities.CoffeeBag(bagMantiqueiraSprite, Engine.Entities.CarryType.BeansMantiqueira);
 			Engine.Entities.EntityManager.add(bagMantiqueira);
 
 			const bagColombiaSprite = sprites.create(Assets.beanBagColombian, SpriteKind.Food);
 			bagColombiaSprite.x = 128;
 			bagColombiaSprite.y = screen.height - 16;
-			bagColombiaSprite.z = 8;
+			bagColombiaSprite.z = 15;
 			const bagColombia = new Engine.Entities.CoffeeBag(bagColombiaSprite, Engine.Entities.CarryType.BeansColombia);
 			Engine.Entities.EntityManager.add(bagColombia);
 
 			this.queueBaseX = screen.width - 24;
-			this.queueSpacing = 14;
+			this.queueSpacing = 16; // Aumentado um pouco o espaçamento para não ficarem colados
 			this.queueY = counterY - 22; // Posiciona mais acima para andarem atrás do balcão
 			
 			this.occupiedSlots = [];
@@ -252,11 +264,25 @@ namespace Engine.Scenes {
 					screen.setPixel(dustX, dustY, 6); // Poeira dourada (cor 6)
 				}
 
-				// Clientes, efeito de respiração e barras de paciência fofas
+				// PROFUNDIDADE: Sombra do Barista
+				if (this.barista && this.barista.active) {
+					let bx = this.barista.sprite.x;
+					let by = this.barista.sprite.y + 10;
+					screen.fillRect(bx - 5, by, 10, 4, 15); // Centro da sombra
+					screen.fillRect(bx - 7, by + 1, 14, 2, 15); // Bordas da sombra
+				}
+
+				// Clientes, efeito de respiração, sombras, barras de paciência e balões de pedido
 				for (let i = 0; i < this.activeCustomers.length; i++) {
 					let c = this.activeCustomers[i];
 					let p = c.paciencia;
 					let maxP = c.pacienciaMax;
+
+					// PROFUNDIDADE: Sombra do Cliente no chão
+					let cx = c.sprite.x;
+					let cy = this.queueY + 10;
+					screen.fillRect(cx - 4, cy, 8, 4, 15);
+					screen.fillRect(cx - 6, cy + 1, 12, 2, 15);
 
 					// Se o cliente está parado esperando, faz o efeito de respiração ("Bobbing")
 					if (c.sprite.vx === 0) {
@@ -273,6 +299,25 @@ namespace Engine.Scenes {
 						
 						screen.drawLine(c.sprite.x - 5, c.sprite.y - 12, c.sprite.x + 5, c.sprite.y - 12, 1); // Fundo
 						screen.drawLine(c.sprite.x - 5, c.sprite.y - 12, c.sprite.x - 5 + barW, c.sprite.y - 12, barColor); // Barra
+						
+						// BALÃO DE PEDIDO (Aparece se o cliente chegou ao seu lugar)
+						if (c.sprite.vx === 0) {
+							let bx = c.sprite.x + 4;
+							let by = c.sprite.y - 28;
+							// Fundo e borda do balão
+							screen.fillRect(bx, by, 18, 18, 1); // Branco
+							screen.drawRect(bx, by, 18, 18, 15); // Borda escura
+							// Rabinho do balão apontando para o cliente
+							screen.drawLine(bx + 2, by + 18, bx + 2, by + 20, 1);
+							screen.drawLine(bx + 1, by + 18, bx + 1, by + 20, 15);
+							
+							// Seleciona a imagem baseada no pedido
+							let reqImg = Assets.espresso;
+							if (c.desiredMethod === Engine.Entities.BrewMethod.V60) reqImg = Assets.v60;
+							else if (c.desiredMethod === Engine.Entities.BrewMethod.Capsule) reqImg = Assets.v60; // Temporário até ter cápsula
+							
+							screen.drawTransparentImage(reqImg, bx + 1, by + 1);
+						}
 					}
 				}
 

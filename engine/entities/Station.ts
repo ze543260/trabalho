@@ -24,7 +24,7 @@ namespace Engine.Entities {
 			super(sprite);
 			this.method = method;
 			this.state = BrewState.Idle;
-			this.processDurationMs = this.getProcessDuration(method);
+			this.processDurationMs = this.calcProcessDuration(method);
 			this.processElapsedMs = 0;
 			this.readyDurationMs = this.getReadyDuration(method);
 			this.readyElapsedMs = 0;
@@ -93,7 +93,7 @@ namespace Engine.Entities {
 			return this.processElapsedMs;
 		}
 
-		public getProcessDurationMs(): number {
+		public getProcessDuration(): number {
 			return this.processDurationMs;
 		}
 
@@ -132,7 +132,7 @@ namespace Engine.Entities {
 			this.readyElapsedMs = 0;
 		}
 
-		private getProcessDuration(method: BrewMethod): number {
+		private calcProcessDuration(method: BrewMethod): number {
 			if (method === BrewMethod.V60) {
 				return 6000;
 			}

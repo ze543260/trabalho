@@ -203,7 +203,7 @@ namespace Engine.Scenes {
 					// Barra de progresso para a máquina
 					if (state === Engine.Entities.BrewState.Processing) {
 						let elapsed = station.getProcessElapsed();
-						let duration = station.getProcessDurationMs();
+						let duration = station.getProcessDuration();
 						let ratio = duration > 0 ? (elapsed / duration) : 0;
 						if (ratio > 1) ratio = 1;
 						if (ratio < 0) ratio = 0;

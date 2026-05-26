@@ -17,6 +17,9 @@ namespace Engine.Entities {
 		private moveSpeed: number;
 		private counterY: number;
 		private blocksAboveCounter: boolean;
+		// Novas variáveis
+		private rightImg: Image;
+		private leftImg: Image;
 
 		constructor(sprite: Sprite, moveSpeed: number, counterY: number) {
 			super(sprite);
@@ -24,6 +27,11 @@ namespace Engine.Entities {
 			this.counterY = counterY;
 			this.blocksAboveCounter = true;
 			this.carryState = CarryType.None;
+			
+			// Cache visual
+			this.rightImg = sprite.image;
+			this.leftImg = sprite.image.clone();
+			this.leftImg.flipX(); // Vira a imagem apenas 1 vez na memória!
 		}
 
 		/** Set the Y line of the counter limit. */
@@ -85,6 +93,13 @@ namespace Engine.Entities {
 
 			this.sprite.vx = vx;
 			this.sprite.vy = vy;
+
+			// Vira o sprite dependendo da velocidade X
+			if (vx < 0) {
+				this.sprite.setImage(this.leftImg);
+			} else if (vx > 0) {
+				this.sprite.setImage(this.rightImg);
+			}
 
 			if (Engine.Core.justPressed(Engine.Core.Action.Interact)) {
 				// TODO: Call station interaction once collision checks exist.

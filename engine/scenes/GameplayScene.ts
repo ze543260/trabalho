@@ -36,6 +36,7 @@ namespace Engine.Scenes {
 
 		// A nossa lista segura de clientes ativos
 		private activeCustomers: CustomerRecord[];
+		private customerWardrobe: Image[]; // <-- NOVO
 
 		constructor() {
 			this.stations = [];
@@ -50,6 +51,7 @@ namespace Engine.Scenes {
 			this.queueY = 0;
 			this.dayEnded = false;
 			this.activeCustomers = [];
+			this.customerWardrobe = []; // <-- NOVO
 		}
 
 		public enter(): void {
@@ -57,6 +59,44 @@ namespace Engine.Scenes {
 			Engine.FX.FXManager.init(30);
 
 			const counterY = (screen.height >> 1) + 8;
+
+			// --- NOVO: PINTANDO O CENÁRIO ESTÁTICO ---
+			let bg = image.create(screen.width, screen.height);
+			bg.fill(13); // Preenche com uma cor base (opcional)
+
+			// Carimba o chão da metade da tela para baixo
+			for (let x = 0; x < screen.width; x += 16) {
+				for (let y = counterY - 8; y < screen.height; y += 16) {
+					bg.drawTransparentImage(Assets.floorTile, x, y);
+				}
+			}
+
+			// Carimba o balcão logo acima do chão
+			for (let x = 0; x < screen.width; x += 16) {
+				bg.drawTransparentImage(Assets.counterTile, x, counterY - 24);
+			}
+
+			// Define essa imagem pintada como o fundo imutável da cena
+			scene.setBackgroundImage(bg);
+			// -----------------------------------------
+
+			// --- NOVO: PRÉ-FABRICANDO ROUPAS ---
+			this.customerWardrobe = [];
+			
+			// 1. Roupa Branca (Padrão)
+			this.customerWardrobe.push(Assets.customerBase);
+			
+			// 2. Roupa Vermelha (Troca a cor 1 pela cor 2)
+			let redCustomer = Assets.customerBase.clone();
+			redCustomer.replace(1, 2);
+			this.customerWardrobe.push(redCustomer);
+			
+			// 3. Roupa Azul (Troca a cor 1 pela cor 8)
+			let blueCustomer = Assets.customerBase.clone();
+			blueCustomer.replace(1, 8);
+			this.customerWardrobe.push(blueCustomer);
+			// -----------------------------------
+
 			const baristaSprite = sprites.create(Assets.baristaBase, SpriteKind.Player);
 			baristaSprite.x = 24;
 			baristaSprite.y = screen.height - 16;
@@ -167,7 +207,8 @@ namespace Engine.Scenes {
 				this.spawnSlotIndex = 0;
 			}
 
-			const sprite = sprites.create(Assets.customerBase, SpriteKind.Enemy);
+			let randomLook = this.customerWardrobe[randint(0, this.customerWardrobe.length - 1)];
+			const sprite = sprites.create(randomLook, SpriteKind.Enemy);
 			sprite.x = spawnX;
 			sprite.y = targetY;
 			sprite.vx = -30;

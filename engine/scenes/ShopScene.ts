@@ -42,9 +42,7 @@ namespace Engine.Scenes {
 				console.log("TODO: Comprar Maquina de Capsulas");
 			});
 
-			if (this.buttons.length > 0) {
-				this.buttons.length = 0;
-			}
+			this.buttons = [];
 			this.buttons.push(grinderButton);
 			this.buttons.push(capsuleButton);
 			this.buttonCount = this.buttons.length;

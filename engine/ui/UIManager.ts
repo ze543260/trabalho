@@ -25,9 +25,7 @@ namespace Engine.UI {
 
 		/** Clear all managed elements. */
 		public static clear(): void {
-			if (this.elements.length > 0) {
-				this.elements.length = 0;
-			}
+			this.elements = [];
 		}
 
 		/** Update all elements. */

@@ -6,7 +6,7 @@
         "arcade-story": "*"
     },
     "files": [
-        "main.ts",
+        
         "engine/Kernel.ts",
         "engine/InputManager.ts",
         "engine/SpritePool.ts",
@@ -30,7 +30,8 @@
         "engine/fx/Tween.ts",
         "engine/fx/ParticleEmitter.ts",
         "assets/assets.ts",
-        "assets/sound.ts"
+        "assets/sound.ts",
+        "main.ts"
     ],
     "testFiles": [
         "test.ts"

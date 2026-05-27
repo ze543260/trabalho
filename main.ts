@@ -6,6 +6,12 @@ image.setPalette(
 
 Engine.Core.init();
 
+// Load saved game if it exists
+let hasSave = Engine.Persistence.SaveManager.hasActiveSave();
+if (hasSave) {
+    Engine.Persistence.SaveManager.loadGame();
+}
+
 // Chamamos o update da SceneStack diretamente no loop nativo, sem arrays de callbacks!
 game.onUpdate(function() {
     Engine.Scenes.SceneStack.update(Engine.Core.deltaTime);

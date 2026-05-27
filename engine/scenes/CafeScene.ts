@@ -229,6 +229,8 @@ namespace Engine.Scenes {
                         this.state = CafeState.ShopTransition;
                         this.dayTimerMs = 2000;
                         game.splash("Fim do Expediente!");
+                        // Save game after day ends
+                        Engine.Persistence.SaveManager.saveGame();
                         // Aqui deve trocar a cena para a loja, no update
                     } else {
                         this.state = CafeState.Waiting;

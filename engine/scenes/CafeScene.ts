@@ -124,7 +124,7 @@ namespace Engine.Scenes {
                 let dialogScene = new Engine.Scenes.DialogScene(this.currentCustomerProfile, nodes, () => {
                     this.state = CafeState.Brewing;
                     // Push BrewScene
-                    let brewScene = new Engine.Scenes.BrewScene(this.currentCustomerProfile.character.name, (recipe) => {
+                    let brewScene = new Engine.Scenes.BrewScene((recipe: Engine.Entities.DrinkRecipe) => {
                         this.state = CafeState.DialogResult;
                         // Handle brew result
                         Engine.Persistence.SaveManager.saveGame();

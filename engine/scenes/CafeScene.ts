@@ -13,11 +13,15 @@ namespace Engine.Scenes {
         private dayTimerMs: number;
         private customersServedToday: number;
         private maxCustomersPerDay: number;
-        
+
         // Background programático
         private bg: Image;
         private currentCustomer: Engine.Entities.DrinkRecipe;
         private resultDrink: Engine.Entities.DrinkRecipe;
+
+        // Day/night cycle with dynamic lighting
+        private timeOfDay: number; // 0-1, where 0=afternoon (5pm), 0.5=evening (8pm), 1=night (11pm)
+        private ambientColor: number; // palette index for ambient lighting
 
         constructor() {
             this.state = CafeState.Waiting;
@@ -25,22 +29,44 @@ namespace Engine.Scenes {
             this.customersServedToday = 0;
             // A cada dia, 1 cliente a mais
             this.maxCustomersPerDay = 2 + Engine.Core.TycoonState.dayNumber;
-            
+
+            // Time starts at afternoon (0.0)
+            this.timeOfDay = 0;
+            this.ambientColor = 14; // warm orange
+
             this.bg = image.create(160, 120);
             this.drawLofiBackground();
         }
 
         private drawLofiBackground() {
-            // Parede
-            this.bg.fill(15); // Escuro/Preto
-            // Janela
-            this.bg.fillRect(20, 20, 50, 40, 11); // Azul escuro
-            // Moldura da janela
-            this.bg.drawRect(19, 19, 52, 42, 12); // Azul claro
-            // Balcão
-            this.bg.fillRect(0, 80, 160, 40, 14); // Marrom escuro
-            // Detalhes balcão
-            this.bg.drawLine(0, 80, 160, 80, 4); // Borda
+            // Use time-of-day color for overall tint
+            this.bg.fill(this.ambientColor);
+
+            // Janela shows sky gradient based on time
+            let skyColor = this.ambientColor;
+            this.bg.fillRect(20, 20, 50, 40, skyColor);
+            this.bg.drawRect(19, 19, 52, 42, this.ambientColor === 14 ? 5 : 1);
+
+            // Balcão stays relatively constant
+            this.bg.fillRect(0, 80, 160, 40, 4);
+            this.bg.drawLine(0, 80, 160, 80, 0);
+        }
+
+        private advanceTime(dt: number): void {
+            // Each customer takes ~3 seconds, advances time by 0.1
+            this.timeOfDay += dt / 30000; // slow progression
+            if (this.timeOfDay > 1.0) this.timeOfDay = 1.0;
+
+            // Update ambient color based on time
+            if (this.timeOfDay < 0.3) {
+                this.ambientColor = 14; // orange (5-6pm)
+            } else if (this.timeOfDay < 0.6) {
+                this.ambientColor = 13; // warm purple (6-8pm)
+            } else if (this.timeOfDay < 0.8) {
+                this.ambientColor = 10; // dark blue (8-10pm)
+            } else {
+                this.ambientColor = 9; // deep blue night (10-11pm)
+            }
         }
 
         public init(): void {
@@ -50,6 +76,8 @@ namespace Engine.Scenes {
         }
 
         public update(dt: number): void {
+            this.advanceTime(dt);
+
             if (this.state === CafeState.Waiting) {
                 this.dayTimerMs -= dt;
                 if (this.dayTimerMs <= 0) {

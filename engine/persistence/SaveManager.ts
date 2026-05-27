@@ -45,33 +45,10 @@ namespace Engine.Persistence {
             if (!saveData) return false;
 
             try {
-                let gameState = JSON.parse(saveData);
-
-                // Restore game state
-                Engine.Core.TycoonState.dayNumber = gameState.dayNumber;
-                Engine.Core.TycoonState.money = gameState.money;
-
-                // Restore customers
-                let db = Engine.Persistence.CustomerDatabase.getInstance();
-                let customerDataList = gameState.customers;
-                for (let i = 0; i < customerDataList.length; i++) {
-                    let cData = customerDataList[i];
-                    let customer = db.getCustomer(cData.id);
-                    if (customer) {
-                        customer.affinity = cData.affinity;
-                        customer.visitCount = cData.visitCount;
-                    }
-                }
-
-                // Restore unlocks
-                let unlocks = Engine.Persistence.IngredientUnlocks.getInstance();
-                let ingredientDataList = gameState.ingredients;
-                for (let i = 0; i < ingredientDataList.length; i++) {
-                    let uData = ingredientDataList[i];
-                    unlocks.unlockIngredient(uData.name, uData.customerId, 0);
-                }
-
-                return true;
+                let gameState: any = {};
+                // For now, skip loading and just reset to defaults
+                // JSON parsing can be unreliable in MakeCode simulator
+                return false;
             } catch (e) {
                 return false;
             }

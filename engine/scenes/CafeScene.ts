@@ -90,11 +90,11 @@ namespace Engine.Scenes {
         }
 
         public init(): void {
-            this.state = CafeState.SelectCustomer;
+            this.state = CafeState.Waiting;
             this.selectedCustomerId = 0;
             this.currentCustomerProfile = null;
             this.dayTimerMs = 2000; // Espera 2 segundos antes do primeiro cliente
-            game.splash("Dia " + Engine.Core.TycoonState.dayNumber, "Escolha um cliente!");
+            game.splash("Dia " + Engine.Core.TycoonState.dayNumber, "Preparado!");
         }
 
         public update(dt: number): void {

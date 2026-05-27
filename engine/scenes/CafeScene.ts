@@ -299,6 +299,12 @@ namespace Engine.Scenes {
 
         public enter(): void {
             this.musicManager.startCafeLoop();
+
+            // Register rendering callback
+            game.onPaint(() => {
+                if (Engine.Scenes.SceneStack.top() !== (this as any)) return;
+                this.render(screen);
+            });
         }
         public exit(): void {}
         public pause(): void {}

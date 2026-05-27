@@ -43,6 +43,15 @@ namespace Engine.Scenes {
                 screen.print(affinityStr, 10, listY + i * 20 + 10, isSelected ? 0 : 8, image.font5);
             }
 
+            // Display unlocked ingredients
+            screen.print("INGREDIENTES DESBLOQUEADOS:", 5, 90, 5, image.font5);
+            let unlocks = Engine.Persistence.IngredientUnlocks.getInstance();
+            let unlockedList = unlocks.getUnlockedIngredients();
+            for (let i = 0; i < unlockedList.length && i < 2; i++) {
+                let ing = unlockedList[i];
+                screen.print("+ " + ing.name, 10, 98 + i * 8, 14, image.font5);
+            }
+
             // Footer
             screen.fillRect(0, 110, 160, 10, 1);
             screen.print("UP/DOWN=select  A=back", 5, 112, 8, image.font5);

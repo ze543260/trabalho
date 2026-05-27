@@ -29,6 +29,7 @@
         "engine/entities/CustomerProfile.ts",
         "engine/entities/DialogChoice.ts",
         "engine/persistence/CustomerDatabase.ts",
+        "engine/persistence/IngredientUnlocks.ts",
         "engine/scenes/Scene.ts",
         "engine/scenes/SceneStack.ts",
         "engine/scenes/BrewScene.ts",

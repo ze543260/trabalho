@@ -446,6 +446,10 @@ namespace Engine.Scenes {
                                 this.displayedText = "";
                                 this.character.setExpression(nextNode.expression);
                             } else {
+                                // Check for ingredient unlocks
+                                let unlocks = Engine.Persistence.IngredientUnlocks.getInstance();
+                                unlocks.checkAndUnlockNew();
+
                                 Engine.Scenes.SceneStack.pop();
                                 if (this.onComplete) {
                                     this.onComplete();

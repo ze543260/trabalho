@@ -43,53 +43,49 @@ namespace Engine.Scenes {
         }
 
         private drawScene(): void {
-            // Fundo principal
-            screen.fill(10); // Navy background
-            
-            // Header
-            screen.fillRect(0, 0, 160, 15, 1); // Dark Maroon Header
-            screen.drawLine(0, 15, 160, 15, 2); // Crimson accent
-            
-            // Painel da máquina (Esquerda)
-            screen.fillRect(4, 20, 88, 76, 9); // Dark blue machine area
-            screen.drawRect(4, 20, 88, 76, 8); // Slate blue border
-            
-            // Painel do Pedido (Direita)
-            screen.fillRect(96, 20, 60, 76, 9); // Dark blue recipe area
-            screen.drawRect(96, 20, 60, 76, 8); // Slate blue border
-            
-            // Rodapé (Selector)
-            screen.fillRect(0, 100, 160, 20, 1); // Dark Maroon Footer
-            screen.drawLine(0, 99, 160, 99, 2); // Crimson accent
+            // ─── FUNDO (Cafeteria) ─────────────────────────────────────────
+            screen.drawTransparentImage(Assets.bgLofi, 0, 0);
+
+            // Overlay escuro/dither para destacar a máquina e UI
+            // Como MakeCode não tem alpha global fácil, desenhamos linhas horizontais espaçadas para um efeito Lofi scanline escurecido
+            for (let i = 0; i < 120; i += 2) {
+                screen.drawLine(0, i, 160, i, 10);
+            }
+
+            // Cabeçalho leve
+            screen.fillRect(0, 0, 160, 12, 10); 
+            screen.drawLine(0, 12, 160, 12, 9); 
 
             // ─── TÍTULO ────────────────────────────────────────────────────
-            screen.print(" PREPARO DE CAFE ", 30, 4, 6, image.font5); // Cream text
+            screen.print(" PREPARO ", 50, 3, 6, image.font5); // Cream text
 
             // ─── MÁQUINA CENTRAL (64x64) ───────────────────────────────────
             let machine = this.getCurrentMachineImg();
             if (machine !== null) {
-                screen.drawTransparentImage(machine, 16, 26);
+                // Sombra da máquina
+                screen.fillRect(14, 82, 68, 6, 9);
+                screen.drawTransparentImage(machine, 16, 20);
             }
 
             // Nome do item selecionado abaixo da máquina
             let labels = ["Grao Mantiqueira", "Grao Colombia", "Espresso", "V60", "Leite", "Mel", "SERVIR!"];
             let lbl = labels[this.cursorIndex];
-            screen.print(lbl, 48 - (lbl.length * 4) / 2, 86, 14, image.font5); // Gold text centered in left panel
+            screen.print(lbl, 50 - (lbl.length * 4) / 2, 90, 5, image.font5); 
 
-            // ─── PAINEL DA RECEITA (lado direito) ──────────────────────────
-            screen.print("PEDIDO", 112, 24, 14, image.font5); // Gold
-            screen.drawLine(100, 32, 152, 32, 8);
+            // ─── PAINEL DA RECEITA (lado direito flutuante) ────────────────
+            screen.print("PEDIDO", 104, 18, 14, image.font5); // Gold
+            screen.drawLine(104, 26, 144, 26, 8);
 
-            let ry = 36;
+            let ry = 30;
             // Grão
             if (this.recipe.bean !== Engine.Entities.BeanType.None) {
                 let bStr = this.recipe.bean === Engine.Entities.BeanType.Mantiqueira ? "Mantique." : "Colombia";
-                screen.print("Grao:", 100, ry, 5, image.font5); // Peach
-                screen.print(bStr, 100, ry + 8, 6, image.font5); // Cream
+                screen.print("Grao:", 104, ry, 5, image.font5); // Peach
+                screen.print(bStr, 104, ry + 8, 6, image.font5); // Cream
                 ry += 18;
             } else {
-                screen.print("Grao:", 100, ry, 5, image.font5);
-                screen.print("?", 100, ry + 8, 8, image.font5); // Slate
+                screen.print("Grao:", 104, ry, 5, image.font5);
+                screen.print("?", 104, ry + 8, 8, image.font5); // Slate
                 ry += 18;
             }
 
@@ -99,51 +95,54 @@ namespace Engine.Scenes {
                 if (this.recipe.method === Engine.Entities.BrewMethod.Espresso) mStr = "Espresso";
                 else if (this.recipe.method === Engine.Entities.BrewMethod.V60) mStr = "V60";
                 else mStr = "Capsula";
-                screen.print("Metodo:", 100, ry, 5, image.font5);
-                screen.print(mStr, 100, ry + 8, 6, image.font5);
+                screen.print("Metodo:", 104, ry, 5, image.font5);
+                screen.print(mStr, 104, ry + 8, 6, image.font5);
                 ry += 18;
             } else {
-                screen.print("Metodo:", 100, ry, 5, image.font5);
-                screen.print("?", 100, ry + 8, 8, image.font5);
+                screen.print("Metodo:", 104, ry, 5, image.font5);
+                screen.print("?", 104, ry + 8, 8, image.font5);
                 ry += 18;
             }
 
             // Extras
             if (this.recipe.addins.indexOf(Engine.Entities.AddinType.Milk) >= 0) {
-                screen.print("+ Leite", 100, ry, 6, image.font5);
+                screen.print("+ Leite", 104, ry, 6, image.font5);
                 ry += 8;
             }
             if (this.recipe.addins.indexOf(Engine.Entities.AddinType.Honey) >= 0) {
-                screen.print("+ Mel", 100, ry, 14, image.font5);
+                screen.print("+ Mel", 104, ry, 14, image.font5);
                 ry += 8;
             }
 
             // Dica de controles
             screen.print("A=add", 100, 88, 8, image.font5);
 
-            // ─── TRILHO DE SELEÇÃO (rodapé) ────────────────────────────────
+            // ─── TRILHO DE SELEÇÃO (rodapé minimalista) ───────────────────
+            // Fundo suave para os ícones
+            screen.fillRect(0, 100, 160, 20, 10);
+            screen.drawLine(0, 100, 160, 100, 9);
+
             let slotW = 22;
             let slotNames = ["MAN", "COL", "ESP", "V60", "LEI", "MEL", "OK"];
             let slotColors = [14, 14, 9, 13, 6, 14, 12];
             
             for (let i = 0; i < 7; i++) {
                 let sx = 4 + i * slotW;
-                let sy = 102;
+                let sy = 104;
                 let isSel = this.cursorIndex === i;
 
-                // Fundo do card
-                screen.fillRect(sx, sy, 20, 15, isSel ? 6 : 10);
-                screen.drawRect(sx, sy, 20, 15, isSel ? 7 : 8);
+                if (isSel) {
+                    // Destaque limpo sob o texto
+                    screen.fillRect(sx, sy, 20, 12, 1);
+                }
 
                 // Cor do ícone/texto
-                let txtColor = isSel ? 1 : slotColors[i];
-                screen.print(slotNames[i], sx + 4, sy + 5, txtColor, image.font5);
+                let txtColor = isSel ? 6 : slotColors[i];
+                screen.print(slotNames[i], sx + 4, sy + 3, txtColor, image.font5);
 
-                // Seta de seleção acima
+                // Linha fina acima para mostrar foco
                 if (isSel) {
-                    screen.setPixel(sx + 9, sy - 2, 6);
-                    screen.setPixel(sx + 10, sy - 2, 6);
-                    screen.drawLine(sx + 8, sy - 3, sx + 11, sy - 3, 6);
+                    screen.drawLine(sx, sy - 4, sx + 20, sy - 4, 5);
                 }
             }
 

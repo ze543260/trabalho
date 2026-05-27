@@ -36,9 +36,13 @@ namespace Engine.Entities {
         }
 
         public getPortraitImage(): Image {
-            // Returns a 32x32 portrait sprite placeholder.
-            // TODO: wire up real portrait assets indexed by
-            // basePortraitIndex * 3 + currentExpression.
+            if (this.basePortraitIndex === 0) {
+                return Assets.getPortraitLua();
+            } else if (this.basePortraitIndex === 1) {
+                return Assets.getPortraitOmar();
+            } else if (this.basePortraitIndex === 2) {
+                return Assets.getPortraitYuki();
+            }
             return image.create(32, 32);
         }
     }

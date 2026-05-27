@@ -5,6 +5,12 @@ namespace Engine.Scenes {
         private logoY: number;
 
         constructor() {
+            // Load saved game if it exists
+            let hasSave = Engine.Persistence.SaveManager.hasActiveSave();
+            if (hasSave) {
+                Engine.Persistence.SaveManager.loadGame();
+            }
+
             this.bg = image.create(screen.width, screen.height);
             this.rainDrops = [];
             for (let i = 0; i < 40; i++) {

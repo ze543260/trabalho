@@ -118,6 +118,21 @@ namespace Engine.Scenes {
                     this.state = CafeState.DialogOrder;
                     // Next phase: transition to DialogScene
                 }
+            } else if (this.state === CafeState.DialogOrder) {
+                // Create dialog nodes for customer
+                let nodes = this.generateDialogNodesForCustomer(this.currentCustomerProfile);
+                let dialogScene = new Engine.Scenes.DialogScene(this.currentCustomerProfile, nodes, () => {
+                    this.state = CafeState.Brewing;
+                    // Push BrewScene
+                    let brewScene = new Engine.Scenes.BrewScene(this.currentCustomerProfile.character.name, (recipe) => {
+                        this.state = CafeState.DialogResult;
+                        // Handle brew result
+                        Engine.Persistence.SaveManager.saveGame();
+                    });
+                    Engine.Scenes.SceneStack.push(brewScene);
+                });
+                Engine.Scenes.SceneStack.push(dialogScene);
+                this.state = CafeState.Waiting; // Prevent re-entry
             } else if (this.state === CafeState.Waiting) {
                 this.dayTimerMs -= dt;
                 if (this.dayTimerMs <= 0) {
@@ -131,6 +146,25 @@ namespace Engine.Scenes {
                     // Engine.Scenes.SceneStack.push(new ShopScene());
                 }
             }
+        }
+
+        private generateDialogNodesForCustomer(customer: Engine.Entities.CustomerProfile): Engine.Entities.DialogNode[] {
+            // Return sample dialog nodes for the customer
+            // In a full game, this would be a large data structure
+            return [
+                new Engine.Entities.DialogNode(
+                    "Ola! Um cafe, por favor.",
+                    0, // happy expression
+                    [
+                        new Engine.Entities.DialogChoice("Com prazer!", 1, 1),
+                        new Engine.Entities.DialogChoice("Talvez depois...", -1, 1)
+                    ]
+                ),
+                new Engine.Entities.DialogNode(
+                    "Obrigado!",
+                    0
+                )
+            ];
         }
 
         private spawnCustomer() {

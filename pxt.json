@@ -21,6 +21,7 @@
         "engine/fx/FXManager.ts",
         "engine/fx/ParticleEmitter.ts",
         "engine/entities/Customer.ts",
+        "engine/entities/Character.ts",
         "engine/scenes/Scene.ts",
         "engine/scenes/SceneStack.ts",
         "engine/scenes/BrewScene.ts",

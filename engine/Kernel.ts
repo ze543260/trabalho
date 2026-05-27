@@ -52,5 +52,6 @@ namespace Engine.Core {
         export let hasCapsule: boolean = false;
         export let hasMilk: boolean = false;
         export let hasHoney: boolean = false;
+        export let hasColombia: boolean = false;
     }
 }

@@ -170,26 +170,42 @@ namespace Engine.Scenes {
                     dialogLines = ["Esta chovendo muito hoje.", "Eu gosto da chuva. Te da uma desculpa pra nao ir a lugar nenhum."];
                 }
             } else if (charIndex === 1) {
-                // OMAR KHALIL — V60 Mantiqueira + mel
+                // OMAR KHALIL — V60/Espresso Mantiqueira + mel (if available)
                 portrait = Assets.getPortraitOmar();
                 this.currentCustomer.bean = Engine.Entities.BeanType.Mantiqueira;
-                this.currentCustomer.method = Engine.Entities.BrewMethod.V60;
-                if (Engine.Core.TycoonState.hasHoney) this.currentCustomer.addAddin(Engine.Entities.AddinType.Honey);
+                
+                this.currentCustomer.method = Engine.Core.TycoonState.hasV60 ? Engine.Entities.BrewMethod.V60 : Engine.Entities.BrewMethod.Espresso;
+                
+                if (Engine.Core.TycoonState.hasHoney) {
+                    this.currentCustomer.addAddin(Engine.Entities.AddinType.Honey);
+                }
+
+                let methodStr = Engine.Core.TycoonState.hasV60 ? "V60" : "Espresso";
+                let addinStr = Engine.Core.TycoonState.hasHoney ? " com mel" : "";
+
                 if (Engine.Core.TycoonState.dayNumber === 1) {
-                    dialogLines = ["Boa noite. Um V60, por favor.", "Minha esposa me ensinou a apreciar o V60. Dizia que precisa de paciencia."];
+                    let line2 = Engine.Core.TycoonState.hasV60 ? "Minha esposa me ensinou a apreciar o V60. Dizia que precisa de paciencia." : "Obrigado por abrir este cafe. O bairro precisava de um lugar assim.";
+                    dialogLines = [`Boa noite. Um ${methodStr}${addinStr}, por favor.`, line2];
                 } else if (Engine.Core.TycoonState.dayNumber === 2) {
                     dialogLines = ["De novo eu. O cafe de ontem estava perfeito.", "Voce sabia que no Marrocos o cafe e servido com especiarias?"];
                 } else {
                     dialogLines = ["Boa noite, amigo.", "Hoje e aniversario dela. O cafe e a unica coisa que ainda me faz lembrar sem doer."];
                 }
             } else {
-                // YUKI TANAKA — V60 Colombia + leite
+                // YUKI TANAKA — V60/Espresso Colombia/Mantiqueira + leite (if available)
                 portrait = Assets.getPortraitYuki();
-                this.currentCustomer.bean = Engine.Entities.BeanType.Colombia;
-                this.currentCustomer.method = Engine.Entities.BrewMethod.V60;
-                if (Engine.Core.TycoonState.hasMilk) this.currentCustomer.addAddin(Engine.Entities.AddinType.Milk);
+                this.currentCustomer.bean = Engine.Core.TycoonState.hasColombia ? Engine.Entities.BeanType.Colombia : Engine.Entities.BeanType.Mantiqueira;
+                this.currentCustomer.method = Engine.Core.TycoonState.hasV60 ? Engine.Entities.BrewMethod.V60 : Engine.Entities.BrewMethod.Espresso;
+                
+                if (Engine.Core.TycoonState.hasMilk) {
+                    this.currentCustomer.addAddin(Engine.Entities.AddinType.Milk);
+                }
+
+                let methodStr = Engine.Core.TycoonState.hasV60 ? "V60" : "Espresso";
+                let addinStr = Engine.Core.TycoonState.hasMilk ? " com leite" : "";
+
                 if (Engine.Core.TycoonState.dayNumber === 1) {
-                    dialogLines = ["Desculpe incomodar... Um V60 com leite, por favor.", "Posso desenhar o cafe enquanto espero? O vapor e muito bonito..."];
+                    dialogLines = [`Desculpe incomodar... Um ${methodStr}${addinStr}, por favor.`, "Posso desenhar o cafe enquanto espero? O vapor e muito bonito..."];
                 } else if (Engine.Core.TycoonState.dayNumber === 2) {
                     dialogLines = ["Ola! Posso sentar no mesmo lugar de ontem?", "Voce tem um rosto interessante. Ja desenhei voce no meu caderno."];
                 } else {
@@ -296,16 +312,22 @@ namespace Engine.Scenes {
             // Weather effects
             this.weatherSystem.draw(screen);
 
-            // Status no canto superior (Pequeno e minimalista)
-            screen.print(`Dia ${Engine.Core.TycoonState.dayNumber}`, 2, 2, 1, image.font5);
-            screen.print(`Dinheiro: $${Engine.Core.TycoonState.money}`, 2, 10, 5, image.font5);
-            screen.print(`Atendidos: ${this.customersServedToday}/${this.maxCustomersPerDay}`, 2, 18, 9, image.font5);
+            // HUD Background
+            screen.fillRect(0, 0, 160, 24, 10); // Navy background for HUD
+            screen.drawLine(0, 24, 160, 24, 1); // Border
+            
+            // HUD Text
+            screen.print(`DIA ${Engine.Core.TycoonState.dayNumber}`, 4, 4, 6, image.font5); // Cream
+            screen.print(`$${Engine.Core.TycoonState.money}`, 130, 4, 14, image.font5); // Gold
+            screen.print(`Atendimentos: ${this.customersServedToday}/${this.maxCustomersPerDay}`, 4, 14, 5, image.font5); // Peach
 
             if (this.state === CafeState.Waiting) {
                 // Subtle waiting text
                 let waitText = "Aguardando cliente...";
                 let w = waitText.length * 4;
-                screen.print(waitText, 80 - w/2, 60, 5, image.font5);
+                screen.fillRect(0, 100, 160, 20, 10); // Navy bar
+                screen.drawLine(0, 99, 160, 99, 1);
+                screen.print(waitText, 80 - w/2, 106, 6, image.font5); // Cream text
             }
         }
 

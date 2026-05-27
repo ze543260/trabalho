@@ -1,11 +1,11 @@
 namespace Engine.Scenes {
     export class BrewScene implements Scene {
-        private barista: Engine.Entities.Barista;
+        private onComplete: (recipe: Engine.Entities.DrinkRecipe) => void;
         private recipe: Engine.Entities.DrinkRecipe;
         private cursorIndex: number;
 
-        constructor(barista: Engine.Entities.Barista) {
-            this.barista = barista;
+        constructor(onComplete: (recipe: Engine.Entities.DrinkRecipe) => void) {
+            this.onComplete = onComplete;
             this.recipe = new Engine.Entities.DrinkRecipe();
             this.cursorIndex = 0;
         }
@@ -33,8 +33,8 @@ namespace Engine.Scenes {
                 // 6: [SERVIR]
 
                 const items = [
-                    { name: "Grão Man.", img: Assets.beanBagMantiqueira, x: 20, y: 30 },
-                    { name: "Grão Col.", img: Assets.beanBagColombian, x: 60, y: 30 },
+                    { name: "Grão Man.", img: null, x: 20, y: 30 },
+                    { name: "Grão Col.", img: null, x: 60, y: 30 },
                     { name: "Espresso", img: Assets.largeEspresso, x: 20, y: 60 },
                     { name: "V60", img: Assets.largeV60, x: 60, y: 60 },
                     { name: "Leite", img: Assets.largeMilk, x: 20, y: 90 },
@@ -43,7 +43,13 @@ namespace Engine.Scenes {
 
                 for (let i = 0; i < items.length; i++) {
                     let item = items[i];
-                    screen.drawTransparentImage(item.img, item.x - (item.img.width/2), item.y - (item.img.height/2));
+                    if (item.img) {
+                        screen.drawTransparentImage(item.img, item.x - (item.img.width/2), item.y - (item.img.height/2));
+                    } else {
+                        // Se não tiver imagem (Sacas de café), desenha um quadrado marrom
+                        screen.fillRect(item.x - 8, item.y - 8, 16, 16, 14);
+                        screen.print(item.name.substr(0, 3), item.x - 6, item.y - 4, 1);
+                    }
                     if (this.cursorIndex === i) {
                         screen.drawRect(item.x - 18, item.y - 18, 36, 36, 5); // Cursor amarelo
                         screen.print(item.name, 10, 110, 5);
@@ -110,9 +116,8 @@ namespace Engine.Scenes {
                 else if (this.cursorIndex === 5 && this.recipe.method !== Engine.Entities.BrewMethod.None) this.recipe.addAddin(Engine.Entities.AddinType.Honey);
                 else if (this.cursorIndex === 6) {
                     // SERVIR!
-                    this.barista.setCarryType(Engine.Entities.CarryType.Cup);
-                    this.barista.cupData = this.recipe;
                     SceneStack.pop();
+                    this.onComplete(this.recipe);
                 }
             }
 

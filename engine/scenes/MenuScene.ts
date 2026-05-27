@@ -82,7 +82,7 @@ namespace Engine.Scenes {
                 
                 // Vai pro jogo
                 Engine.Scenes.SceneStack.pop();
-                Engine.Scenes.SceneStack.push(new Engine.Scenes.GameplayScene());
+                Engine.Scenes.SceneStack.push(new Engine.Scenes.CafeScene());
             }
         }
 

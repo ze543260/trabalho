@@ -1,128 +1,109 @@
 namespace Engine.Scenes {
-	/**
-	 * Scene that shows the upgrade shop menu.
-	 */
-	export class ShopScene implements Scene {
-		private window: Engine.UI.Window;
-		private buttons: Engine.UI.Button[];
-		private focusedIndex: number;
-		private buttonCount: number;
+    interface ShopItem {
+        name: string;
+        price: number;
+        checkOwned: () => boolean;
+        buy: () => void;
+    }
 
-		constructor() {
-			this.window = new Engine.UI.Window(0, 0, 1, 1, "");
-			this.buttons = [];
-			this.focusedIndex = 0;
-			this.buttonCount = 0;
-		}
+    export class ShopScene implements Scene {
+        private items: ShopItem[];
+        private cursorIndex: number;
 
-		/** Create the shop UI. */
-		public enter(): void {
-			Engine.UI.UIManager.clear();
+        constructor() {
+            this.cursorIndex = 0;
+            this.items = [
+                {
+                    name: "Filtro V60",
+                    price: 25,
+                    checkOwned: () => Engine.Core.TycoonState.hasV60,
+                    buy: () => { Engine.Core.TycoonState.hasV60 = true; }
+                },
+                {
+                    name: "Licença P/ Leite",
+                    price: 15,
+                    checkOwned: () => Engine.Core.TycoonState.hasMilk,
+                    buy: () => { Engine.Core.TycoonState.hasMilk = true; }
+                },
+                {
+                    name: "Mel Orgânico",
+                    price: 20,
+                    checkOwned: () => Engine.Core.TycoonState.hasHoney,
+                    buy: () => { Engine.Core.TycoonState.hasHoney = true; }
+                },
+                {
+                    name: "Máquina de Cápsula",
+                    price: 50,
+                    checkOwned: () => Engine.Core.TycoonState.hasCapsule,
+                    buy: () => { Engine.Core.TycoonState.hasCapsule = true; }
+                }
+            ];
+        }
 
-			const margin = 8;
-			const windowWidth = screen.width - (margin * 2);
-			const windowHeight = screen.height - (margin * 2);
-			const windowX = margin;
-			const windowY = margin;
+        public init(): void {
+            this.cursorIndex = 0;
+            music.magicWand.play();
+        }
 
-			this.window = new Engine.UI.Window(windowX, windowY, windowWidth, windowHeight, "Loja - $" + Engine.Core.TycoonState.money);
-			Engine.UI.UIManager.add(this.window);
+        public update(dt: number): void {
+            if (Engine.Core.justPressed(Engine.Core.Action.Down)) {
+                this.cursorIndex = (this.cursorIndex + 1) % this.items.length;
+            } else if (Engine.Core.justPressed(Engine.Core.Action.Up)) {
+                this.cursorIndex = (this.cursorIndex - 1 + this.items.length) % this.items.length;
+            }
 
-			const buttonWidth = windowWidth - 16;
-			const buttonHeight = 14;
-			const buttonX = windowX + 8;
-			let buttonY = windowY + 20;
+            if (Engine.Core.justPressed(Engine.Core.Action.Interact)) {
+                let item = this.items[this.cursorIndex];
+                if (!item.checkOwned() && Engine.Core.TycoonState.money >= item.price) {
+                    Engine.Core.TycoonState.money -= item.price;
+                    item.buy();
+                    music.baDing.play();
+                } else {
+                    music.buzzer.play();
+                }
+            }
 
-			const grinderButton = new Engine.UI.Button(buttonX, buttonY, buttonWidth, buttonHeight, "Upgrade Moedor", function (): void {
-				console.log("TODO: Upgrade Moedor");
-			});
+            // Pressione B para Próximo Dia
+            if (Engine.Core.justPressed(Engine.Core.Action.Discard)) {
+                Engine.Core.TycoonState.dayNumber++;
+                Engine.Scenes.SceneStack.pop();
+                Engine.Scenes.SceneStack.push(new CafeScene());
+            }
+        }
 
-			buttonY += buttonHeight + 6;
-			const capsuleButton = new Engine.UI.Button(buttonX, buttonY, buttonWidth, buttonHeight, "Maquina de Capsulas", function (): void {
-				console.log("TODO: Comprar Maquina de Capsulas");
-			});
+        public enter(): void {}
+        public exit(): void {}
+        public pause(): void {}
+        public resume(): void {}
 
-			buttonY += buttonHeight + 6;
-			let counterPrice = Engine.Core.TycoonState.maxCounterSlots * 15;
-			let counterText = "";
-			if (Engine.Core.TycoonState.maxCounterSlots >= 5) {
-				counterText = "Balcao no Maximo (5)";
-			} else {
-				counterText = "Expandir Balcao: $" + counterPrice;
-			}
-			const counterButton = new Engine.UI.Button(buttonX, buttonY, buttonWidth, buttonHeight, counterText, function (): void {
-				if (Engine.Core.TycoonState.maxCounterSlots < 5) {
-					if (Engine.Core.TycoonState.money >= counterPrice) {
-						Engine.Core.TycoonState.money -= counterPrice;
-						Engine.Core.TycoonState.maxCounterSlots += 1;
-						Engine.Scenes.SceneStack.pop();
-						Engine.Scenes.SceneStack.push(new Engine.Scenes.ShopScene());
-					}
-				}
-			});
+        public render(screen: Image): void {
+            screen.fill(13); // Fundo bege claro
 
-			this.buttons = [];
-			this.buttons.push(grinderButton);
-			this.buttons.push(capsuleButton);
-			this.buttons.push(counterButton);
-			this.buttonCount = this.buttons.length;
-			this.focusedIndex = 0;
-			this.applyFocus();
+            screen.print("== LOJA DE EQUIPAMENTOS ==", 10, 10, 15, image.font5);
+            screen.print("Dinheiro: $" + Engine.Core.TycoonState.money, 10, 22, 5, image.font5);
 
-			Engine.UI.UIManager.add(grinderButton);
-			Engine.UI.UIManager.add(capsuleButton);
-			Engine.UI.UIManager.add(counterButton);
-		}
+            for (let i = 0; i < this.items.length; i++) {
+                let item = this.items[i];
+                let y = 40 + i * 15;
+                
+                let isSelected = i === this.cursorIndex;
+                let color = isSelected ? 7 : 15; // Verde se selecionado, branco normal
 
-		/** Handle input and update UI. */
-		public update(dt: number): void {
-			if (Engine.Core.justPressed(Engine.Core.Action.Up)) {
-				this.moveFocus(-1);
-			}
-			if (Engine.Core.justPressed(Engine.Core.Action.Down)) {
-				this.moveFocus(1);
-			}
+                let text = item.name + " - $" + item.price;
+                if (item.checkOwned()) {
+                    text = item.name + " [COMPRADO]";
+                    color = 8; // Cinza
+                }
 
-			if (Engine.Core.justPressed(Engine.Core.Action.Discard)) {
-				Engine.Scenes.SceneStack.pop();
-				return;
-			}
+                if (isSelected) {
+                    screen.print(">", 5, y, 7, image.font5);
+                }
+                screen.print(text, 15, y, color, image.font5);
+            }
 
-			Engine.UI.UIManager.update(dt);
-			Engine.UI.UIManager.render(screen);
-		}
+            screen.print("Pressione B para o Dia Seguinte", 10, 105, 12, image.font5);
+        }
 
-		/** Clear the shop UI. */
-		public exit(): void {
-			Engine.UI.UIManager.clear();
-		}
-
-		public pause(): void {
-		}
-
-		public resume(): void {
-		}
-
-		private moveFocus(direction: number): void {
-			if (this.buttonCount <= 0) {
-				return;
-			}
-
-			let nextIndex = this.focusedIndex + direction;
-			if (nextIndex < 0) {
-				nextIndex = this.buttonCount - 1;
-			} else if (nextIndex >= this.buttonCount) {
-				nextIndex = 0;
-			}
-
-			this.focusedIndex = nextIndex;
-			this.applyFocus();
-		}
-
-		private applyFocus(): void {
-			for (let i = 0; i < this.buttonCount; i++) {
-				this.buttons[i].setFocused(i === this.focusedIndex);
-			}
-		}
-	}
+        public destroy(): void { }
+    }
 }

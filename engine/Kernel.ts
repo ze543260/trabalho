@@ -53,9 +53,11 @@ namespace Engine.Core {
 
     // Global Tycoon state variables
     export namespace TycoonState {
-        export let money: number = 20; // Starts with $20
-        export let maxCounterSlots: number = 1; // Starts with 1 customer slot
-        export let baristaSpeedLevel: number = 0;
-        export let hasCapsuleMachine: boolean = false;
+        export let money: number = 0; // Starts with $0
+        export let dayNumber: number = 1;
+        export let hasV60: boolean = false;
+        export let hasCapsule: boolean = false;
+        export let hasMilk: boolean = false;
+        export let hasHoney: boolean = false;
     }
 }

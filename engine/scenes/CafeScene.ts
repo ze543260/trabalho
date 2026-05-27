@@ -180,7 +180,7 @@ namespace Engine.Scenes {
 
             if (charIndex === 0) {
                 // LUA SANTOS — espresso Mantiqueira, sem extras
-                portrait = Assets.portraitLua;
+                portrait = Assets.getPortraitLua();
                 this.currentCustomer.bean = Engine.Entities.BeanType.Mantiqueira;
                 this.currentCustomer.method = Engine.Entities.BrewMethod.Espresso;
                 if (Engine.Core.TycoonState.dayNumber === 1) {
@@ -192,7 +192,7 @@ namespace Engine.Scenes {
                 }
             } else if (charIndex === 1) {
                 // OMAR KHALIL — V60 Mantiqueira + mel
-                portrait = Assets.portraitOmar;
+                portrait = Assets.getPortraitOmar();
                 this.currentCustomer.bean = Engine.Entities.BeanType.Mantiqueira;
                 this.currentCustomer.method = Engine.Entities.BrewMethod.V60;
                 if (Engine.Core.TycoonState.hasHoney) this.currentCustomer.addAddin(Engine.Entities.AddinType.Honey);
@@ -205,7 +205,7 @@ namespace Engine.Scenes {
                 }
             } else {
                 // YUKI TANAKA — V60 Colombia + leite
-                portrait = Assets.portraitYuki;
+                portrait = Assets.getPortraitYuki();
                 this.currentCustomer.bean = Engine.Entities.BeanType.Colombia;
                 this.currentCustomer.method = Engine.Entities.BrewMethod.V60;
                 if (Engine.Core.TycoonState.hasMilk) this.currentCustomer.addAddin(Engine.Entities.AddinType.Milk);

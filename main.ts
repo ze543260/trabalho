@@ -12,8 +12,17 @@ if (hasSave) {
     Engine.Persistence.SaveManager.loadGame();
 }
 
-// Chamamos o update da SceneStack diretamente no loop nativo, sem arrays de callbacks!
+// Single update loop: input + deltaTime + scenes
+let lastTime = control.millis();
 game.onUpdate(function() {
+    let now = control.millis();
+    Engine.Core.deltaTime = now - lastTime;
+    lastTime = now;
+
+    // Update input
+    Engine.Core.updateInput();
+
+    // Update active scene
     Engine.Scenes.SceneStack.update(Engine.Core.deltaTime);
 });
 

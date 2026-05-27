@@ -13,16 +13,9 @@ namespace Engine.Core {
             currentInput[i] = false;
             previousInput[i] = false;
         }
-
-        game.onUpdate(function () {
-            let now = control.millis();
-            deltaTime = now - lastTime;
-            lastTime = now;
-            updateInput();
-        });
     }
 
-    function updateInput() {
+    export function updateInput() {
         for (let i = 0; i < 6; i++) {
             previousInput[i] = currentInput[i];
         }

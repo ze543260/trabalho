@@ -1,0 +1,44 @@
+{
+  "characters": [
+    {
+      "id": 0,
+      "name": "Mysterious Student",
+      "tone": "Mysterious",
+      "portraits": {
+        "happy": "img_char0_happy",
+        "sad": "img_char0_sad",
+        "thoughtful": "img_char0_thoughtful"
+      }
+    },
+    {
+      "id": 1,
+      "name": "Cheerful Regular",
+      "tone": "Cheerful",
+      "portraits": {
+        "happy": "img_char1_happy",
+        "sad": "img_char1_sad",
+        "thoughtful": "img_char1_thoughtful"
+      }
+    },
+    {
+      "id": 2,
+      "name": "Calm Elder",
+      "tone": "Calm",
+      "portraits": {
+        "happy": "img_char2_happy",
+        "sad": "img_char2_sad",
+        "thoughtful": "img_char2_thoughtful"
+      }
+    },
+    {
+      "id": 3,
+      "name": "Rushed Professional",
+      "tone": "Rushed",
+      "portraits": {
+        "happy": "img_char3_happy",
+        "sad": "img_char3_sad",
+        "thoughtful": "img_char3_thoughtful"
+      }
+    }
+  ]
+}

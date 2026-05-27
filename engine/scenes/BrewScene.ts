@@ -3,32 +3,12 @@ namespace Engine.Scenes {
         private onComplete: (recipe: Engine.Entities.DrinkRecipe) => void;
         private recipe: Engine.Entities.DrinkRecipe;
         private cursorIndex: number;
-
-        // Grid 3x2 + botão SERVIR (índice 6)
-        // [ 0:ManBag ] [ 1:ColBag  ] [ 2:Espresso ]
-        // [ 3:V60    ] [ 4:Leite   ] [ 5:Mel      ]
-        //                              [ 6:SERVIR  ]
-
-        // Posições centrais dos slots no ecrã 160x120
-        // Painel esq. para a grelha: x 10..90
-        // Painel dir. para a receita: x 96..158
-        private readonly SLOTS: {x: number, y: number, label: string, icon: Image}[] = [];
+        // índices: 0=Mantiqueira 1=Colombia 2=Espresso 3=V60 4=Leite 5=Mel 6=SERVIR
 
         constructor(onComplete: (recipe: Engine.Entities.DrinkRecipe) => void) {
             this.onComplete = onComplete;
             this.recipe = new Engine.Entities.DrinkRecipe();
             this.cursorIndex = 0;
-        }
-
-        private getSlots(): {x: number, y: number, label: string, icon: Image}[] {
-            return [
-                { x: 20, y: 44, label: "Mantiqueira",  icon: Assets.iconMantiqueira },
-                { x: 52, y: 44, label: "Colombia",     icon: Assets.iconColombia    },
-                { x: 84, y: 44, label: "Espresso",     icon: Assets.iconEspresso    },
-                { x: 20, y: 82, label: "V60",          icon: Assets.iconV60         },
-                { x: 52, y: 82, label: "Leite",        icon: Assets.iconMilk        },
-                { x: 84, y: 82, label: "Mel",          icon: Assets.iconHoney       },
-            ];
         }
 
         public enter(): void {
@@ -39,86 +19,117 @@ namespace Engine.Scenes {
         }
 
         private drawScene(): void {
-            // --- Fundo ---
-            screen.fillRect(0, 0, screen.width, screen.height, 15);      // preto geral
+            // ─── FUNDO (balcão lofi noturno) ───────────────────────────────
+            screen.fill(10);                             // preto-azulado fundo
+            screen.fillRect(0, 0, 160, 11, 1);           // header preto
+            screen.fillRect(0, 100, 160, 20, 10);        // rodapé selector
+            screen.fillRect(0, 99, 160, 2, 1);           // separador selector
+            screen.fillRect(0, 11, 96, 89, 9);           // painel esq (balcão)
+            screen.fillRect(98, 11, 62, 89, 10);         // painel dir (receita)
+            screen.fillRect(96, 11, 2, 89, 1);           // divisor vertical
 
-            // Painel esquerdo (bancada, madeira)
-            screen.fillRect(0, 0, 104, screen.height, 11);               // azul noite
-            screen.fillRect(0, 0, 104, 16, 15);                          // header preto
+            // Efeito de lamparina (glow circular no centro esq)
+            screen.fillRect(16, 20, 64, 64, 9);          // área da máquina
 
-            // Separador vertical
-            screen.fillRect(104, 0, 2, screen.height, 12);
+            // ─── TÍTULO ────────────────────────────────────────────────────
+            screen.print("BANCADA DE PREPARO", 10, 3, 5, image.font5);
 
-            // --- Cabeçalho ---
-            screen.print("PREPARO", 24, 5, 6, image.font5);
-
-            // --- Slots dos itens ---
-            let slots = this.getSlots();
-            for (let i = 0; i < slots.length; i++) {
-                let s = slots[i];
-                let sel = this.cursorIndex === i;
-                let cx = s.x - 8;
-                let cy = s.y - 8;
-
-                // Fundo do card
-                screen.fillRect(cx - 1, cy - 1, 18, 18, sel ? 6 : 13);
-                // Ícone real 16x16
-                screen.drawTransparentImage(s.icon, cx, cy);
-                // Borda seleção
-                if (sel) {
-                    screen.drawRect(cx - 2, cy - 2, 20, 20, 5);
-                }
-                // Label curta abaixo
-                let shortLabel = s.label.substr(0, 3);
-                screen.print(shortLabel, cx + 2, cy + 18, sel ? 5 : 12, image.font5);
+            // ─── MÁQUINA CENTRAL (64x64) ───────────────────────────────────
+            let machine = this.getCurrentMachineImg();
+            if (machine !== null) {
+                screen.drawTransparentImage(machine, 16, 20);
             }
 
-            // --- Botão SERVIR ---
-            let servSel = this.cursorIndex === 6;
-            screen.fillRect(57, 103, 42, 14, servSel ? 5 : 13);
-            screen.drawRect(57, 103, 42, 14, servSel ? 15 : 12);
-            screen.print("SERVIR", 61, 107, servSel ? 15 : 12, image.font5);
+            // Nome do item selecionado abaixo da máquina
+            let labels = ["Grao Mantiqueira", "Grao Colombia", "Espresso", "V60", "Leite", "Mel", "SERVIR!"];
+            screen.print(labels[this.cursorIndex], 10, 89, 14, image.font5);
 
-            // --- Painel Direito: Receita em construção ---
-            screen.print("RECEITA", 108, 5, 12, image.font5);
-            screen.drawLine(106, 13, 158, 13, 13);
+            // ─── PAINEL DA RECEITA (lado direito) ──────────────────────────
+            screen.print("PEDIDO:", 100, 14, 12, image.font5);
+            screen.drawLine(98, 22, 160, 22, 8);
 
-            let ry = 18;
+            let ry = 25;
             // Grão
             if (this.recipe.bean !== Engine.Entities.BeanType.None) {
-                let bIcon = this.recipe.bean === Engine.Entities.BeanType.Mantiqueira
-                    ? Assets.iconMantiqueira : Assets.iconColombia;
-                screen.drawTransparentImage(bIcon, 108, ry);
-                let bLabel = this.recipe.bean === Engine.Entities.BeanType.Mantiqueira ? "Man." : "Col.";
-                screen.print(bLabel, 126, ry + 4, 5, image.font5);
-                ry += 22;
+                let bStr = this.recipe.bean === Engine.Entities.BeanType.Mantiqueira ? "Mantiqueira" : "Colombia";
+                screen.print("Grao:", 100, ry, 5, image.font5);
+                screen.print(bStr, 100, ry + 7, 14, image.font5);
+                ry += 18;
             } else {
-                screen.print("? grao", 108, ry, 13, image.font5);
-                ry += 10;
+                screen.print("Grao: ?", 100, ry, 8, image.font5);
+                ry += 12;
             }
 
             // Método
             if (this.recipe.method !== Engine.Entities.BrewMethod.None) {
-                let mIcon = this.recipe.method === Engine.Entities.BrewMethod.Espresso
-                    ? Assets.iconEspresso : Assets.iconV60;
-                screen.drawTransparentImage(mIcon, 108, ry);
-                let mLabel = this.recipe.method === Engine.Entities.BrewMethod.Espresso ? "Esp." : "V60";
-                screen.print(mLabel, 126, ry + 4, 6, image.font5);
-                ry += 22;
+                let mStr = "";
+                if (this.recipe.method === Engine.Entities.BrewMethod.Espresso) mStr = "Espresso";
+                else if (this.recipe.method === Engine.Entities.BrewMethod.V60) mStr = "V60";
+                else mStr = "Capsula";
+                screen.print("Metodo:", 100, ry, 5, image.font5);
+                screen.print(mStr, 100, ry + 7, 6, image.font5);
+                ry += 18;
             } else {
-                screen.print("? metodo", 108, ry, 13, image.font5);
-                ry += 10;
+                screen.print("Metodo: ?", 100, ry, 8, image.font5);
+                ry += 12;
             }
 
             // Extras
             if (this.recipe.addins.indexOf(Engine.Entities.AddinType.Milk) >= 0) {
-                screen.drawTransparentImage(Assets.iconMilk, 108, ry);
-                screen.print("+Leite", 126, ry + 4, 1, image.font5);
-                ry += 20;
+                screen.print("+ Leite", 100, ry, 7, image.font5);
+                ry += 10;
             }
             if (this.recipe.addins.indexOf(Engine.Entities.AddinType.Honey) >= 0) {
-                screen.drawTransparentImage(Assets.iconHoney, 108, ry);
-                screen.print("+Mel", 126, ry + 4, 5, image.font5);
+                screen.print("+ Mel", 100, ry, 14, image.font5);
+                ry += 10;
+            }
+
+            // Dica de controles
+            screen.print("A=add B=back", 100, 90, 8, image.font5);
+
+            // ─── TRILHO DE SELEÇÃO (rodapé) ────────────────────────────────
+            // 7 slots de 20px cada, centrados em 140px (0..139)
+            let slotW = 20;
+            let slotNames = ["MAN", "COL", "ESP", "V60", "LEI", "MEL", "OK"];
+            let slotColors = [14, 3, 9, 13, 7, 14, 12];
+
+            for (let i = 0; i < 7; i++) {
+                let sx = 4 + i * slotW;
+                let sy = 102;
+                let isSel = this.cursorIndex === i;
+
+                // Fundo do card
+                screen.fillRect(sx, sy, 18, 15, isSel ? 8 : 10);
+                screen.drawRect(sx, sy, 18, 15, isSel ? 5 : 8);
+
+                // Cor do ícone/texto
+                screen.print(slotNames[i], sx + 1, sy + 5, slotColors[i], image.font5);
+
+                // Seta de seleção acima
+                if (isSel) {
+                    screen.setPixel(sx + 8, sy - 2, 5);
+                    screen.setPixel(sx + 9, sy - 2, 5);
+                    screen.setPixel(sx + 8, sy - 1, 5);
+                    screen.setPixel(sx + 9, sy - 1, 5);
+                }
+            }
+        }
+
+        // Retorna a imagem 64x64 do item focado
+        private getCurrentMachineImg(): Image {
+            if (this.cursorIndex === 0 || this.cursorIndex === 1) {
+                // Para grãos, mostrar o V60 como contexto de torra
+                return Assets.machineV60_64;
+            } else if (this.cursorIndex === 2) {
+                return Assets.machineEspresso64;
+            } else if (this.cursorIndex === 3) {
+                return Assets.machineV60_64;
+            } else if (this.cursorIndex === 4) {
+                return Assets.machineMilk64;
+            } else if (this.cursorIndex === 5) {
+                return Assets.machineHoney64;
+            } else {
+                return Assets.machineEspresso64;
             }
         }
 
@@ -127,22 +138,11 @@ namespace Engine.Scenes {
         public resume(): void {}
 
         public update(dt: number): void {
-            // Navegação: grid 3 colunas (0..5) + SERVIR (6)
             if (Engine.Core.justPressed(Engine.Core.Action.Right)) {
-                if (this.cursorIndex < 5) this.cursorIndex++;
-                else this.cursorIndex = 6;
+                this.cursorIndex = (this.cursorIndex + 1) % 7;
             }
             if (Engine.Core.justPressed(Engine.Core.Action.Left)) {
-                if (this.cursorIndex === 6) this.cursorIndex = 5;
-                else if (this.cursorIndex > 0) this.cursorIndex--;
-            }
-            if (Engine.Core.justPressed(Engine.Core.Action.Down)) {
-                if (this.cursorIndex < 3) this.cursorIndex += 3;
-                else this.cursorIndex = 6;
-            }
-            if (Engine.Core.justPressed(Engine.Core.Action.Up)) {
-                if (this.cursorIndex === 6) this.cursorIndex = 5;
-                else if (this.cursorIndex >= 3) this.cursorIndex -= 3;
+                this.cursorIndex = (this.cursorIndex + 6) % 7;
             }
 
             if (Engine.Core.justPressed(Engine.Core.Action.Interact)) {

@@ -6,6 +6,7 @@
     },
     "files": [
         "assets/assets.ts",
+        "assets/generatedAssets.ts",
         "assets/sound.ts",
         "engine/Kernel.ts",
         "engine/InputManager.ts",

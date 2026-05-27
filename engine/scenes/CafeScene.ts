@@ -66,50 +66,61 @@ namespace Engine.Scenes {
         }
 
         private spawnCustomer() {
-            // Toca sino (Som de blip)
             music.baDing.play();
-            
-            // Cria o pedido do cliente dependendo dos unlocks
             this.currentCustomer = new Engine.Entities.DrinkRecipe();
-            
-            // Randomiza método
-            let methods = [Engine.Entities.BrewMethod.Espresso];
-            if (Engine.Core.TycoonState.hasV60) methods.push(Engine.Entities.BrewMethod.V60);
-            if (Engine.Core.TycoonState.hasCapsule) methods.push(Engine.Entities.BrewMethod.Capsule);
-            this.currentCustomer.method = methods[Math.floor(Math.random() * methods.length)];
-            
-            // Randomiza grão (Colômbia é base, Mantiqueira é aleatório)
-            this.currentCustomer.bean = Math.random() > 0.5 ? Engine.Entities.BeanType.Colombia : Engine.Entities.BeanType.Mantiqueira;
 
-            // Randomiza extras
-            if (Engine.Core.TycoonState.hasMilk && Math.random() > 0.5) this.currentCustomer.addAddin(Engine.Entities.AddinType.Milk);
-            if (Engine.Core.TycoonState.hasHoney && Math.random() > 0.6) this.currentCustomer.addAddin(Engine.Entities.AddinType.Honey);
+            // Seleciona personagem do dia
+            let charIndex = this.customersServedToday % 3;
 
-            // Abre o Dialog
+            let portrait: Image;
+            let dialogLines: string[];
+
+            if (charIndex === 0) {
+                // LUA SANTOS — espresso Mantiqueira, sem extras
+                portrait = Assets.portraitLua;
+                this.currentCustomer.bean = Engine.Entities.BeanType.Mantiqueira;
+                this.currentCustomer.method = Engine.Entities.BrewMethod.Espresso;
+                if (Engine.Core.TycoonState.dayNumber === 1) {
+                    dialogLines = ["So um espresso, por favor.", "Preciso terminar esse codigo hoje."];
+                } else if (Engine.Core.TycoonState.dayNumber === 2) {
+                    dialogLines = ["Mesma coisa de sempre.", "Sabe... as vezes o codigo e mais simples que as pessoas."];
+                } else {
+                    dialogLines = ["Esta chovendo muito hoje.", "Eu gosto da chuva. Te da uma desculpa pra nao ir a lugar nenhum."];
+                }
+            } else if (charIndex === 1) {
+                // OMAR KHALIL — V60 Mantiqueira + mel
+                portrait = Assets.portraitOmar;
+                this.currentCustomer.bean = Engine.Entities.BeanType.Mantiqueira;
+                this.currentCustomer.method = Engine.Entities.BrewMethod.V60;
+                if (Engine.Core.TycoonState.hasHoney) this.currentCustomer.addAddin(Engine.Entities.AddinType.Honey);
+                if (Engine.Core.TycoonState.dayNumber === 1) {
+                    dialogLines = ["Boa noite. Um V60, por favor.", "Minha esposa me ensinou a apreciar o V60. Dizia que precisa de paciencia."];
+                } else if (Engine.Core.TycoonState.dayNumber === 2) {
+                    dialogLines = ["De novo eu. O cafe de ontem estava perfeito.", "Voce sabia que no Marrocos o cafe e servido com especiarias?"];
+                } else {
+                    dialogLines = ["Boa noite, amigo.", "Hoje e aniversario dela. O cafe e a unica coisa que ainda me faz lembrar sem doer."];
+                }
+            } else {
+                // YUKI TANAKA — V60 Colombia + leite
+                portrait = Assets.portraitYuki;
+                this.currentCustomer.bean = Engine.Entities.BeanType.Colombia;
+                this.currentCustomer.method = Engine.Entities.BrewMethod.V60;
+                if (Engine.Core.TycoonState.hasMilk) this.currentCustomer.addAddin(Engine.Entities.AddinType.Milk);
+                if (Engine.Core.TycoonState.dayNumber === 1) {
+                    dialogLines = ["Desculpe incomodar... Um V60 com leite, por favor.", "Posso desenhar o cafe enquanto espero? O vapor e muito bonito..."];
+                } else if (Engine.Core.TycoonState.dayNumber === 2) {
+                    dialogLines = ["Ola! Posso sentar no mesmo lugar de ontem?", "Voce tem um rosto interessante. Ja desenhei voce no meu caderno."];
+                } else {
+                    dialogLines = ["Esse lugar me lembra Kyoto a noite.", "Posso te mostrar o desenho que fiz? Espero que nao se importe..."];
+                }
+            }
+
             this.state = CafeState.DialogOrder;
-            
-            let methodStr = "";
-            if (this.currentCustomer.method === Engine.Entities.BrewMethod.Espresso) methodStr = "Espresso";
-            else if (this.currentCustomer.method === Engine.Entities.BrewMethod.V60) methodStr = "V60";
-            else if (this.currentCustomer.method === Engine.Entities.BrewMethod.Capsule) methodStr = "Cápsula";
-
-            let beanStr = this.currentCustomer.bean === Engine.Entities.BeanType.Mantiqueira ? "Mantiqueira" : "Colômbia";
-            
-            let extras = [];
-            if (this.currentCustomer.addins.indexOf(Engine.Entities.AddinType.Milk) >= 0) extras.push("leite");
-            if (this.currentCustomer.addins.indexOf(Engine.Entities.AddinType.Honey) >= 0) extras.push("mel");
-            let extraStr = extras.length > 0 ? " com " + extras.join(" e ") : "";
-
-            let dialogLines = [
-                "O tempo está péssimo lá fora.",
-                `Eu queria um ${methodStr} de grão ${beanStr}${extraStr}, por favor.`
-            ];
 
             Engine.Scenes.SceneStack.push(new Engine.Scenes.DialogScene(
-                Assets.portraitCustomerA,
+                portrait,
                 dialogLines,
                 () => {
-                    // Quando o diálogo fechar, vai direto pra BrewScene
                     this.state = CafeState.Brewing;
                     Engine.Scenes.SceneStack.push(new Engine.Scenes.BrewScene((craftedCup: Engine.Entities.DrinkRecipe) => {
                         this.resultDrink = craftedCup;

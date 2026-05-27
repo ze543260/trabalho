@@ -44,14 +44,9 @@ namespace Engine.Persistence {
             let saveData = settings.readString(SaveManager.SAVE_SLOT_KEY);
             if (!saveData) return false;
 
-            try {
-                let gameState: any = {};
-                // For now, skip loading and just reset to defaults
-                // JSON parsing can be unreliable in MakeCode simulator
-                return false;
-            } catch (e) {
-                return false;
-            }
+            // For now, skip loading and just reset to defaults
+            // JSON parsing can be unreliable in MakeCode simulator
+            return false;
         }
 
         public static hasActiveSave(): boolean {

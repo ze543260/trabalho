@@ -15,5 +15,12 @@ namespace Assets {
     export function getPortraitYuki(): Image {
         return Assets.portraitYukiImg;
     }
-}
 
+    export function getPortraitAlex(): Image {
+        return Assets.portraitAlexImg;
+    }
+
+    export function getPortraitLeo(): Image {
+        return Assets.portraitLeoImg;
+    }
+}

@@ -152,7 +152,7 @@ namespace Engine.Scenes {
             this.currentCustomer = new Engine.Entities.DrinkRecipe();
 
             // Seleciona personagem do dia
-            let charIndex = this.customersServedToday % 3;
+            let charIndex = this.customersServedToday % 5;
 
             let portrait: Image;
             let dialogLines: string[];
@@ -191,7 +191,7 @@ namespace Engine.Scenes {
                 } else {
                     dialogLines = ["Boa noite, amigo.", "Hoje e aniversario dela. O cafe e a unica coisa que ainda me faz lembrar sem doer."];
                 }
-            } else {
+            } else if (charIndex === 2) {
                 // YUKI TANAKA — V60/Espresso Colombia/Mantiqueira + leite (if available)
                 portrait = Assets.getPortraitYuki();
                 this.currentCustomer.bean = Engine.Core.TycoonState.hasColombia ? Engine.Entities.BeanType.Colombia : Engine.Entities.BeanType.Mantiqueira;
@@ -210,6 +210,35 @@ namespace Engine.Scenes {
                     dialogLines = ["Ola! Posso sentar no mesmo lugar de ontem?", "Voce tem um rosto interessante. Ja desenhei voce no meu caderno."];
                 } else {
                     dialogLines = ["Esse lugar me lembra Kyoto a noite.", "Posso te mostrar o desenho que fiz? Espero que nao se importe..."];
+                }
+            } else if (charIndex === 3) {
+                // ALEX — Non-binary musician
+                portrait = Assets.getPortraitAlex();
+                this.currentCustomer.bean = Engine.Entities.BeanType.Mantiqueira;
+                this.currentCustomer.method = Engine.Core.TycoonState.hasV60 ? Engine.Entities.BrewMethod.V60 : Engine.Entities.BrewMethod.Espresso;
+                if (Engine.Core.TycoonState.hasHoney) this.currentCustomer.addAddin(Engine.Entities.AddinType.Honey);
+                if (Engine.Core.TycoonState.hasMilk) this.currentCustomer.addAddin(Engine.Entities.AddinType.Milk);
+
+                if (Engine.Core.TycoonState.dayNumber === 1) {
+                    dialogLines = ["E ai. Faz qualquer coisa forte pra mim, por favor.", "Minha banda tocou ontem... estou destruide."];
+                } else if (Engine.Core.TycoonState.dayNumber === 2) {
+                    dialogLines = ["O de sempre. Aquele cafe forte me salvou.", "Estamos compondo uma musica nova, meio indie lofi."];
+                } else {
+                    dialogLines = ["Manda o melhor que tiver.", "Trouxe o baixo hoje. Esse cafe da uma inspiracao incrivel."];
+                }
+            } else {
+                // LEO — Cheerful teacher, husband works night shift
+                portrait = Assets.getPortraitLeo();
+                this.currentCustomer.bean = Engine.Core.TycoonState.hasColombia ? Engine.Entities.BeanType.Colombia : Engine.Entities.BeanType.Mantiqueira;
+                this.currentCustomer.method = Engine.Entities.BrewMethod.Espresso;
+                if (Engine.Core.TycoonState.hasMilk) this.currentCustomer.addAddin(Engine.Entities.AddinType.Milk);
+
+                if (Engine.Core.TycoonState.dayNumber === 1) {
+                    dialogLines = ["Oi! Um espresso duplo, se puder.", "E pra viagem. Meu marido faz plantao a noite e preciso levar pra ele!"];
+                } else if (Engine.Core.TycoonState.dayNumber === 2) {
+                    dialogLines = ["Boa noite! O mesmo de ontem, por favor.", "Ele adorou o cafe. Me fez prometer que eu passaria aqui de novo."];
+                } else {
+                    dialogLines = ["Voce salva minhas noites de correcao de provas.", "E meu marido manda um beijo e um muito obrigado!"];
                 }
             }
 

@@ -15,6 +15,7 @@ namespace Engine.Scenes {
         private qteController: Engine.Minigames.QTEController;
         private extractionScore: number;
         private foamingScore: number;
+        private brewResult: Engine.Entities.BrewResult | null;
 
         constructor(onComplete: (recipe: Engine.Entities.DrinkRecipe) => void) {
             this.onComplete = onComplete;
@@ -24,6 +25,7 @@ namespace Engine.Scenes {
             this.qteController = new Engine.Minigames.QTEController();
             this.extractionScore = 0;
             this.foamingScore = 0;
+            this.brewResult = null;
 
             // Initialize QTE events for extraction and foaming
             this.qteController.addEvent(new Engine.Minigames.QTEEvent(50, 2000, 10)); // 2s extraction
@@ -158,6 +160,20 @@ namespace Engine.Scenes {
                     screen.print("Progress: " + progress + "%", 10, 62, 8, image.font5);
                 }
             }
+
+            // ─── RESULT DISPLAY (after QTE complete) ────────────────────────
+            if (this.brewState === BrewState.Complete && this.brewResult) {
+                screen.fillRect(30, 35, 100, 50, 1);
+                screen.drawRect(30, 35, 100, 50, 0);
+
+                let qualityStr = this.brewResult.getQualityString();
+                let qualityColor = this.brewResult.getQualityColor();
+                let scoreStr = "Score: " + this.brewResult.totalScore;
+
+                screen.print(qualityStr, 50, 45, qualityColor, image.font5);
+                screen.print(scoreStr, 45, 60, 5, image.font5);
+                screen.print("A = continuar", 35, 75, 8, image.font5);
+            }
         }
 
         // Retorna a imagem 64x64 do item focado
@@ -231,6 +247,10 @@ namespace Engine.Scenes {
                     this.brewState = BrewState.Complete;
                 }
             } else if (this.brewState === BrewState.Complete) {
+                if (!this.brewResult) {
+                    this.brewResult = new Engine.Entities.BrewResult(this.recipe, this.extractionScore, this.foamingScore);
+                }
+
                 if (Engine.Core.justPressed(Engine.Core.Action.Interact)) {
                     Engine.Scenes.SceneStack.pop();
                     if (this.onComplete) {

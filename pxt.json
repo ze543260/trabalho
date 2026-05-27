@@ -20,6 +20,8 @@
         "engine/fx/Tween.ts",
         "engine/fx/FXManager.ts",
         "engine/fx/ParticleEmitter.ts",
+        "engine/minigames/QTEController.ts",
+        "engine/entities/BrewResult.ts",
         "engine/entities/Customer.ts",
         "engine/entities/Character.ts",
         "engine/entities/CustomerProfile.ts",

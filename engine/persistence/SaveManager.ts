@@ -10,8 +10,8 @@ namespace Engine.Persistence {
             let gameState = {
                 dayNumber: Engine.Core.TycoonState.dayNumber,
                 money: Engine.Core.TycoonState.money,
-                customers: [],
-                ingredients: []
+                customers: [] as any[],
+                ingredients: [] as any[]
             };
 
             // Serialize customers

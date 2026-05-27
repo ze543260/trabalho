@@ -36,9 +36,10 @@ namespace Engine.Entities {
         }
 
         public getPortraitImage(): Image {
-            // Returns a 32x32 portrait sprite
-            // Index: basePortraitIndex * 3 + currentExpression
-            return assets.image.byOne(this.basePortraitIndex * 3 + this.currentExpression);
+            // Returns a 32x32 portrait sprite placeholder.
+            // TODO: wire up real portrait assets indexed by
+            // basePortraitIndex * 3 + currentExpression.
+            return image.create(32, 32);
         }
     }
 }

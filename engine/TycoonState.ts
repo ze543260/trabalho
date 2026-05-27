@@ -1,6 +1,5 @@
+// TycoonState is declared as a namespace in Kernel.ts (Engine.Core.TycoonState).
+// This file is kept intentionally empty to avoid duplicate declarations.
 namespace Engine.Core {
-    export class TycoonState {
-        public static dayNumber: number = 1;
-        public static money: number = 100;
-    }
+    // Intentionally empty - see Kernel.ts for TycoonState namespace
 }

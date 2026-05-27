@@ -54,7 +54,7 @@ namespace Engine.Scenes {
 
             // Footer
             screen.fillRect(0, 110, 160, 10, 1);
-            screen.print("UP/DOWN=select  A=back", 5, 112, 8, image.font5);
+            screen.print("UP/DOWN=select  B=back", 5, 112, 8, image.font5);
         }
 
         public exit(): void {}
@@ -69,7 +69,7 @@ namespace Engine.Scenes {
                 this.selectedCustomerId = (this.selectedCustomerId + 1) % customers.length;
             }
 
-            if (Engine.Core.justPressed(Engine.Core.Action.Menu)) {
+            if (Engine.Core.justPressed(Engine.Core.Action.Discard)) {
                 Engine.Scenes.SceneStack.pop();
             }
         }

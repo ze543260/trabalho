@@ -18,40 +18,38 @@ namespace Engine.Persistence {
         private initializeLazyLoad(): void {
             // Create 4 base customers if not loaded from storage
             if (this.customers.length === 0) {
-                this.customers.push(
-                    new Engine.Entities.CustomerProfile(
-                        0,
-                        new Engine.Entities.Character(
-                            "Estudante Misterioso",
-                            Engine.Entities.CharacterTone.Mysterious,
-                            0
-                        )
-                    ),
-                    new Engine.Entities.CustomerProfile(
-                        1,
-                        new Engine.Entities.Character(
-                            "Regular Feliz",
-                            Engine.Entities.CharacterTone.Cheerful,
-                            1
-                        )
-                    ),
-                    new Engine.Entities.CustomerProfile(
-                        2,
-                        new Engine.Entities.Character(
-                            "Anciao Tranquilo",
-                            Engine.Entities.CharacterTone.Calm,
-                            2
-                        )
-                    ),
-                    new Engine.Entities.CustomerProfile(
-                        3,
-                        new Engine.Entities.Character(
-                            "Profissional Ocupado",
-                            Engine.Entities.CharacterTone.Rushed,
-                            3
-                        )
+                this.customers.push(new Engine.Entities.CustomerProfile(
+                    0,
+                    new Engine.Entities.Character(
+                        "Estudante Misterioso",
+                        Engine.Entities.CharacterTone.Mysterious,
+                        0
                     )
-                );
+                ));
+                this.customers.push(new Engine.Entities.CustomerProfile(
+                    1,
+                    new Engine.Entities.Character(
+                        "Regular Feliz",
+                        Engine.Entities.CharacterTone.Cheerful,
+                        1
+                    )
+                ));
+                this.customers.push(new Engine.Entities.CustomerProfile(
+                    2,
+                    new Engine.Entities.Character(
+                        "Anciao Tranquilo",
+                        Engine.Entities.CharacterTone.Calm,
+                        2
+                    )
+                ));
+                this.customers.push(new Engine.Entities.CustomerProfile(
+                    3,
+                    new Engine.Entities.Character(
+                        "Profissional Ocupado",
+                        Engine.Entities.CharacterTone.Rushed,
+                        3
+                    )
+                ));
             }
         }
 

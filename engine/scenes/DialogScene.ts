@@ -12,6 +12,7 @@ namespace Engine.Scenes {
         private renderable: scene.Renderable;
         private showingChoices: boolean = false;
         private selectedChoiceIndex: number = 0;
+        private nextExpressionIndex: number = -1;
 
         constructor(customer: Engine.Entities.CustomerProfile, nodes: Engine.Entities.DialogNode[], onComplete: () => void) {
             this.customer = customer;

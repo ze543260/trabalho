@@ -219,9 +219,19 @@ namespace Engine.Scenes {
 
             this.state = CafeState.DialogOrder;
 
+            // Build dialog nodes from the dialog lines
+            let nodes: Engine.Entities.DialogNode[] = [];
+            for (let line of dialogLines) {
+                nodes.push(new Engine.Entities.DialogNode(line, 0));
+            }
+
+            // Resolve a customer profile for this spawned customer (charIndex 0..2)
+            let db = Engine.Persistence.CustomerDatabase.getInstance();
+            let profile = db.getCustomer(charIndex);
+
             Engine.Scenes.SceneStack.push(new Engine.Scenes.DialogScene(
-                portrait,
-                dialogLines,
+                profile,
+                nodes,
                 () => {
                     this.state = CafeState.Brewing;
                     Engine.Scenes.SceneStack.push(new Engine.Scenes.BrewScene((craftedCup: Engine.Entities.DrinkRecipe) => {
@@ -254,9 +264,19 @@ namespace Engine.Scenes {
                 music.buzzer.play();
             }
 
+            // Build dialog nodes from the result lines
+            let nodes: Engine.Entities.DialogNode[] = [];
+            for (let line of dialogLines) {
+                nodes.push(new Engine.Entities.DialogNode(line, 0));
+            }
+
+            // Reuse the currently active customer profile, falling back to the first
+            let db = Engine.Persistence.CustomerDatabase.getInstance();
+            let profile = this.currentCustomerProfile ? this.currentCustomerProfile : db.getCustomer(0);
+
             Engine.Scenes.SceneStack.push(new Engine.Scenes.DialogScene(
-                Assets.portraitCustomerA,
-                dialogLines,
+                profile,
+                nodes,
                 () => {
                     this.customersServedToday++;
                     if (this.customersServedToday >= this.maxCustomersPerDay) {

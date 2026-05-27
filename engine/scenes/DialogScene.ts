@@ -1,5 +1,6 @@
 namespace Engine.Scenes {
     export class DialogScene implements Scene {
+        private character: Engine.Entities.Character;
         private portrait: Image;
         private lines: string[];
         private currentLineIndex: number;
@@ -10,8 +11,9 @@ namespace Engine.Scenes {
         private bgCache: Image;
         private renderable: scene.Renderable;
 
-        constructor(portrait: Image, lines: string[], onComplete: () => void) {
-            this.portrait = portrait;
+        constructor(character: Engine.Entities.Character, lines: string[], onComplete: () => void) {
+            this.character = character;
+            this.portrait = character.getPortraitImage();
             this.lines = lines;
             this.onComplete = onComplete;
             this.currentLineIndex = 0;
@@ -379,7 +381,9 @@ namespace Engine.Scenes {
                 if (this.displayedText.length % 3 === 0) {
                     let lastChar = this.displayedText.charAt(this.displayedText.length - 1);
                     if (lastChar !== " ") {
-                        music.playTone(330, 10);
+                        // Use character-specific tone frequency
+                        let freq = this.character.getToneFrequency();
+                        music.playTone(freq, 10);
                     }
                 }
             }

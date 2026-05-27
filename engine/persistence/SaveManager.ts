@@ -78,7 +78,8 @@ namespace Engine.Persistence {
         }
 
         public static hasActiveSave(): boolean {
-            return settings.readString(SaveManager.SAVE_SLOT_KEY) !== "";
+            let save = settings.readString(SaveManager.SAVE_SLOT_KEY);
+            return save ? true : false;
         }
     }
 }

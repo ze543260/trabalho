@@ -44,7 +44,11 @@ namespace Engine.Scenes {
 
         private drawScene(): void {
             // ─── FUNDO (Cafeteria) ─────────────────────────────────────────
-            screen.drawTransparentImage(Assets.bgLofi, 0, 0);
+            // Desenha um ambiente de cafeteria escurecido manualmente
+            screen.fill(13); // Fundo base roxo/escuro
+            screen.fillRect(0, 80, 160, 40, 4); // Balcão em tom terroso
+            screen.fillRect(20, 20, 50, 40, 14); // Reflexo da janela em laranja/amarelo
+            screen.drawRect(19, 19, 52, 42, 5); // Moldura da janela
 
             // Overlay escuro/dither para destacar a máquina e UI
             // Como MakeCode não tem alpha global fácil, desenhamos linhas horizontais espaçadas para um efeito Lofi scanline escurecido

@@ -2,11 +2,7 @@ namespace Engine.Entities {
 	/** Possible items held by the barista. */
 	export enum CarryType {
 		None = 0,
-		BeansMantiqueira = 1,
-		BeansColombia = 2,
-		Espresso = 3,
-		V60 = 4,
-		Capsule = 5
+		Cup = 1
 	}
 
 	/**
@@ -17,7 +13,7 @@ namespace Engine.Entities {
 		private moveSpeed: number;
 		private counterY: number;
 		private blocksAboveCounter: boolean;
-		// Novas variáveis
+		public cupData: DrinkRecipe;
 		private rightImg: Image;
 		private leftImg: Image;
 		private lastBobOffset: number;
@@ -28,6 +24,7 @@ namespace Engine.Entities {
 			this.counterY = counterY;
 			this.blocksAboveCounter = true;
 			this.carryState = CarryType.None;
+			this.cupData = null;
 			this.lastBobOffset = 0;
 			
 			// Cache visual
@@ -125,37 +122,9 @@ namespace Engine.Entities {
 				this.lastBobOffset = 0;
 			}
 
-			if (Engine.Core.justPressed(Engine.Core.Action.Interact)) {
-				const entities = Engine.Entities.EntityManager.getActiveEntities();
-				let closestEntity: Entity | null = null;
-				let minDistance = 24;
-
-				for (let i = 0; i < entities.length; i++) {
-					const ent = entities[i];
-					if (ent === this) continue;
-
-					if (ent instanceof Station || ent instanceof CoffeeBag) {
-						const dx = Math.abs(this.sprite.x - ent.getSprite().x);
-						const dy = Math.abs(this.sprite.y - ent.getSprite().y);
-						const dist = dx + dy;
-						if (dist < minDistance) {
-							minDistance = dist;
-							closestEntity = ent;
-						}
-					}
-				}
-
-				if (closestEntity) {
-					if (closestEntity instanceof Station) {
-						this.carryState = closestEntity.interact(this.carryState);
-					} else if (closestEntity instanceof CoffeeBag) {
-						this.carryState = closestEntity.interact(this.carryState);
-					}
-				}
-			}
-
 			if (Engine.Core.justPressed(Engine.Core.Action.Discard)) {
 				this.carryState = CarryType.None;
+				this.cupData = null;
 			}
 		}
 	}

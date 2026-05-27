@@ -6,9 +6,9 @@ namespace Engine.Scenes {
 		public paciencia: number;
 		public pacienciaMax: number;
 		public rewardMultiplier: number;
-		public desiredBean: Engine.Entities.BeanType;
-		public desiredMethod: Engine.Entities.BrewMethod;
+		public recipe: Engine.Entities.DrinkRecipe;
 		public slotIndex: number;
+		public hasOrdered: boolean;
 
 		constructor(s: Sprite) {
 			this.sprite = s;
@@ -16,15 +16,14 @@ namespace Engine.Scenes {
 			this.paciencia = 0;
 			this.pacienciaMax = 0;
 			this.rewardMultiplier = 0;
-			this.desiredBean = Engine.Entities.BeanType.None;
-			this.desiredMethod = Engine.Entities.BrewMethod.Espresso;
+			this.recipe = new Engine.Entities.DrinkRecipe();
 			this.slotIndex = -1;
+			this.hasOrdered = false;
 		}
 	}
 
 	export class GameplayScene implements Scene {
 		private barista: Engine.Entities.Barista;
-		private stations: Engine.Entities.Station[];
 		private spawnTimerMs: number;
 		private spawnIntervalMs: number;
 		private dayElapsedMs: number;
@@ -45,7 +44,6 @@ namespace Engine.Scenes {
 		private catImg2: Image;
 
 		constructor() {
-			this.stations = [];
 			this.spawnTimerMs = 0;
 			this.spawnIntervalMs = 4000;
 			this.dayElapsedMs = 0;
@@ -228,37 +226,18 @@ namespace Engine.Scenes {
 			this.barista = new Engine.Entities.Barista(baristaSprite, 50, counterY);
 			Engine.Entities.EntityManager.add(this.barista);
 
-			this.stations = [];
+			// Bancada inferior agora é apenas decorativa no Top-Down (minigame acontecerá na BrewScene)
 			const espressoSprite = sprites.create(Assets.espresso, SpriteKind.Food);
-			espressoSprite.x = 32;
-			espressoSprite.y = screen.height - 16; // Mesa inferior
-			espressoSprite.z = 15; // Z maior que o barista para dar a ilusão de profundidade e ficar na frente
-			const espressoStation = new Engine.Entities.Station(espressoSprite, Engine.Entities.BrewMethod.Espresso);
-			this.stations.push(espressoStation);
-			Engine.Entities.EntityManager.add(espressoStation);
+			espressoSprite.x = 32; espressoSprite.y = screen.height - 16; espressoSprite.z = 15;
 
 			const v60Sprite = sprites.create(Assets.v60, SpriteKind.Food);
-			v60Sprite.x = 64;
-			v60Sprite.y = screen.height - 16; // Mesa inferior
-			v60Sprite.z = 15;
-			const v60Station = new Engine.Entities.Station(v60Sprite, Engine.Entities.BrewMethod.V60);
-			this.stations.push(v60Station);
-			Engine.Entities.EntityManager.add(v60Station);
+			v60Sprite.x = 64; v60Sprite.y = screen.height - 16; v60Sprite.z = 15;
 
-			// Cria as sacas de café interativas (CoffeeBag) no balcão de baixo
 			const bagMantiqueiraSprite = sprites.create(Assets.beanBagMantiqueira, SpriteKind.Food);
-			bagMantiqueiraSprite.x = 96;
-			bagMantiqueiraSprite.y = screen.height - 16;
-			bagMantiqueiraSprite.z = 15;
-			const bagMantiqueira = new Engine.Entities.CoffeeBag(bagMantiqueiraSprite, Engine.Entities.CarryType.BeansMantiqueira);
-			Engine.Entities.EntityManager.add(bagMantiqueira);
+			bagMantiqueiraSprite.x = 96; bagMantiqueiraSprite.y = screen.height - 16; bagMantiqueiraSprite.z = 15;
 
 			const bagColombiaSprite = sprites.create(Assets.beanBagColombian, SpriteKind.Food);
-			bagColombiaSprite.x = 128;
-			bagColombiaSprite.y = screen.height - 16;
-			bagColombiaSprite.z = 15;
-			const bagColombia = new Engine.Entities.CoffeeBag(bagColombiaSprite, Engine.Entities.CarryType.BeansColombia);
-			Engine.Entities.EntityManager.add(bagColombia);
+			bagColombiaSprite.x = 128; bagColombiaSprite.y = screen.height - 16; bagColombiaSprite.z = 15;
 
 			this.queueBaseX = screen.width - 24;
 			this.queueSpacing = 16; // Aumentado um pouco o espaçamento para não ficarem colados
@@ -396,59 +375,16 @@ namespace Engine.Scenes {
 							
 							// Seleciona a imagem baseada no pedido
 							let reqImg = Assets.espresso;
-							if (c.desiredMethod === Engine.Entities.BrewMethod.V60) reqImg = Assets.v60;
-							else if (c.desiredMethod === Engine.Entities.BrewMethod.Capsule) reqImg = Assets.v60; // Temporário até ter cápsula
+							if (c.recipe.method === Engine.Entities.BrewMethod.V60) reqImg = Assets.v60;
+							else if (c.recipe.method === Engine.Entities.BrewMethod.Capsule) reqImg = Assets.v60; // Temporário até ter cápsula
 							
 							screen.drawTransparentImage(reqImg, bx + 1, by + 1);
 						}
 					}
 				}
 
-				// Barra de progresso, luzes de estado e vapor detalhado nas máquinas de café
-				for (let i = 0; i < this.stations.length; i++) {
-					let station = this.stations[i];
-					let state = station.getState();
-					let sprite = station.sprite;
+				// --- As máquinas do balcão de baixo viraram cena de minigame (BrewScene) ---
 
-					// Vapor mais gordinho e com fade-out gradual
-					if (state === Engine.Entities.BrewState.Processing || state === Engine.Entities.BrewState.Ready) {
-						for (let p = 0; p < 4; p++) {
-							let offset = (time + p * 250) % 1000;
-							let py = sprite.y - 8 - Math.floor(offset / 40); // Sobe suavemente
-							let px = sprite.x + Math.floor(Math.sin((time + p * 400) / 150) * 4); // Ziguezague maior
-							
-							let vaporColor = py > sprite.y - 16 ? 7 : 5; 
-							if (py > sprite.y - 28) {
-								screen.setPixel(px, py, vaporColor);
-								screen.setPixel(px + 1, py, vaporColor); // Vapor mais gordinho
-							}
-						}
-					}
-
-					// Barra de progresso para a máquina
-					if (state === Engine.Entities.BrewState.Processing) {
-						let elapsed = station.getProcessElapsed();
-						let duration = station.getProcessDuration();
-						let ratio = duration > 0 ? (elapsed / duration) : 0;
-						if (ratio > 1) ratio = 1;
-						if (ratio < 0) ratio = 0;
-						let barW = Math.floor(12 * ratio);
-						screen.fillRect(sprite.x - 6, sprite.y - 12, 12, 2, 1); // Fundo branco
-						screen.fillRect(sprite.x - 6, sprite.y - 12, barW, 2, 5); // Progresso verde (cor 5)
-					} else if (state === Engine.Entities.BrewState.Ready) {
-						// Luz indicadora piscando amarelo
-						let blink = (game.runtime() / 200) % 2 === 0;
-						if (blink) {
-							screen.fillCircle(sprite.x, sprite.y - 10, 2, 4); // 4 = amarelo
-						}
-					} else if (state === Engine.Entities.BrewState.Ruined) {
-						// Luz indicadora piscando vermelho
-						let blink = (game.runtime() / 150) % 2 === 0;
-						if (blink) {
-							screen.fillCircle(sprite.x, sprite.y - 10, 2, 2); // 2 = vermelho
-						}
-					}
-				}
 
 				// Ponteiros do Relógio Ticking na parede (movido para x=114, y=16)
 				let sec = (time / 1000) % 60;
@@ -458,21 +394,14 @@ namespace Engine.Scenes {
 				screen.drawLine(114, 16, handX, handY, 2); // Ponteiro de segundos vermelho (cor 2)
 				screen.drawLine(114, 16, 114, 13, 15);     // Ponteiro de horas fixo/preto (cor 15)
 
-				// Item carregado pelo Barista (Balão flutuando acima da cabeça)
-				if (this.barista && this.barista.active) {
-					const carry = this.barista.getCarryType();
-					if (carry !== Engine.Entities.CarryType.None) {
-						let img: Image = null;
-						if (carry === Engine.Entities.CarryType.BeansMantiqueira) img = Assets.beanBagMantiqueira;
-						else if (carry === Engine.Entities.CarryType.BeansColombia) img = Assets.beanBagColombian;
-						else if (carry === Engine.Entities.CarryType.Espresso) img = Assets.espresso;
-						else if (carry === Engine.Entities.CarryType.V60) img = Assets.v60;
-
-						if (img) {
-							// Desenha o item flutuando acima da cabeça (y - 18)
-							screen.drawTransparentImage(img, this.barista.sprite.x - (img.width >> 1), this.barista.sprite.y - 18);
-						}
+				// Item carregado pelo Barista (A Xícara Pronta)
+				if (this.barista && this.barista.active && this.barista.getCarryType() === Engine.Entities.CarryType.Cup && this.barista.cupData) {
+					// Por hora desenha só o espresso para representar a xícara
+					let img = Assets.espresso; 
+					if (this.barista.cupData.method === Engine.Entities.BrewMethod.V60) {
+						img = Assets.v60;
 					}
+					screen.drawTransparentImage(img, this.barista.sprite.x - (img.width >> 1), this.barista.sprite.y - 18);
 				}
 
 				// === ADVANCED VFX: Floating Combat Text ===
@@ -499,10 +428,18 @@ namespace Engine.Scenes {
 		}
 
 		public update(dt: number): void {
-			// Interação com os clientes
+			// Interação com os clientes ou Bancada de Trabalho
 			if (Engine.Core.justPressed(Engine.Core.Action.Interact)) {
 				let carry = this.barista.getCarryType();
 				let baristaSprite = this.barista.sprite;
+				
+				// CHECA BANCADA DE PREPARO INFERIOR
+				if (baristaSprite.y > screen.height - 36) {
+					// Abre a tela de preparo de café
+					Engine.Scenes.SceneStack.push(new Engine.Scenes.BrewScene(this.barista));
+					return; // Para não processar a interação com cliente no mesmo frame
+				}
+
 				let closestCustomer: CustomerRecord = null;
 				let minDistance = 24;
 
@@ -521,23 +458,34 @@ namespace Engine.Scenes {
 				if (closestCustomer) {
 					// 1. Mãos vazias: Conversa e pede o café
 					if (carry === Engine.Entities.CarryType.None) {
-						let txt = ["Oi...", "O clima ta bem frio la fora.", "Me da um cafe bem forte?"];
-						if (closestCustomer.desiredMethod === Engine.Entities.BrewMethod.V60) {
-							txt = ["Com licenca.", "Gostaria de um cafe coado bem suave.", "Demora muito?"];
-						}
+						// Mostra o pedido (Abertura de Visual Novel)
+						let methodStr = "";
+						if (closestCustomer.recipe.method === Engine.Entities.BrewMethod.Espresso) methodStr = "Espresso";
+						else if (closestCustomer.recipe.method === Engine.Entities.BrewMethod.V60) methodStr = "V60";
+						else if (closestCustomer.recipe.method === Engine.Entities.BrewMethod.Capsule) methodStr = "Cápsula";
+
+						let beanStr = closestCustomer.recipe.bean === Engine.Entities.BeanType.Mantiqueira ? "Mantiqueira" : "Colômbia";
+						
+						let extras = [];
+						if (closestCustomer.recipe.addins.indexOf(Engine.Entities.AddinType.Milk) >= 0) extras.push("leite");
+						if (closestCustomer.recipe.addins.indexOf(Engine.Entities.AddinType.Honey) >= 0) extras.push("mel");
+						
+						let extraStr = extras.length > 0 ? " com " + extras.join(" e ") : "";
+
+						let falas = [
+							"Chove muito lá fora...",
+							`Eu preciso de um ${methodStr} de ${beanStr}${extraStr}.`
+						];
 
 						Engine.Scenes.SceneStack.push(new Engine.Scenes.DialogScene(
 							Assets.portraitCustomerA,
-							txt,
-							() => {} // Callback vazio, apenas fecha o diálogo
+							falas,
+							() => { closestCustomer.hasOrdered = true; }
 						));
 					} 
 					// 2. Entregando uma bebida
-					else if (carry === Engine.Entities.CarryType.Espresso || carry === Engine.Entities.CarryType.V60 || carry === Engine.Entities.CarryType.Capsule) {
-						let methodMatch = false;
-						if (closestCustomer.desiredMethod === Engine.Entities.BrewMethod.Espresso && carry === Engine.Entities.CarryType.Espresso) methodMatch = true;
-						else if (closestCustomer.desiredMethod === Engine.Entities.BrewMethod.V60 && carry === Engine.Entities.CarryType.V60) methodMatch = true;
-						else if (closestCustomer.desiredMethod === Engine.Entities.BrewMethod.Capsule && carry === Engine.Entities.CarryType.Capsule) methodMatch = true;
+					else if (carry === Engine.Entities.CarryType.Cup && this.barista.cupData) {
+						let methodMatch = closestCustomer.recipe.matches(this.barista.cupData);
 
 						let gain = 0;
 						let txt = [];
@@ -655,26 +603,28 @@ namespace Engine.Scenes {
 			sprite.vx = -30;
 			sprite.z = 1; // Fica atrás do balcão (z=5)
 
-			let cData = new CustomerRecord(sprite);
-			cData.targetX = targetX;
-			cData.slotIndex = freeSlotIndex;
+			let rec = new CustomerRecord(sprite);
+			rec.targetX = targetX;
+			rec.slotIndex = freeSlotIndex;
 
-			if (randint(0, 4) === 0) {
-				cData.paciencia = 60; // Aumentado de 40 para 60 segundos
-				cData.pacienciaMax = 60;
-				cData.rewardMultiplier = 3;
-				cData.desiredBean = Engine.Entities.BeanType.Mantiqueira;
-				cData.desiredMethod = Engine.Entities.BrewMethod.V60;
-			} else {
-				cData.paciencia = 30; // Aumentado de 10 para 30 segundos
-				cData.pacienciaMax = 30;
-				cData.rewardMultiplier = 1;
-				cData.desiredMethod = randint(0, 1) === 0 ? Engine.Entities.BrewMethod.Espresso : Engine.Entities.BrewMethod.Capsule;
-				cData.desiredBean = randint(0, 1) === 0 ? Engine.Entities.BeanType.Mantiqueira : Engine.Entities.BeanType.Colombia;
-			}
+			// Randomiza o Pedido
+			const methods = [Engine.Entities.BrewMethod.Espresso, Engine.Entities.BrewMethod.V60, Engine.Entities.BrewMethod.Capsule];
+			const beans = [Engine.Entities.BeanType.Mantiqueira, Engine.Entities.BeanType.Colombia];
+			
+			rec.recipe.method = methods[Math.floor(Math.random() * methods.length)];
+			rec.recipe.bean = beans[Math.floor(Math.random() * beans.length)];
+			
+			// 50% de chance de pedir Leite
+			if (Math.random() > 0.5) rec.recipe.addAddin(Engine.Entities.AddinType.Milk);
+			// 30% de chance de pedir Mel
+			if (Math.random() > 0.7) rec.recipe.addAddin(Engine.Entities.AddinType.Honey);
 
-			this.occupiedSlots[freeSlotIndex] = cData;
-			this.activeCustomers.push(cData);
+			rec.pacienciaMax = 30000;
+			rec.paciencia = 30000;
+			rec.rewardMultiplier = 1;
+
+			this.occupiedSlots[freeSlotIndex] = rec;
+			this.activeCustomers.push(rec);
 		}
 
 		private updateDayClock(dt: number): void {

@@ -22,16 +22,15 @@
         "engine/entities/Entity.ts",
         "engine/entities/EntityManager.ts",
         "engine/entities/Customer.ts",
-        "engine/entities/Station.ts",
         "engine/entities/Barista.ts",
         "engine/scenes/Scene.ts",
         "engine/scenes/SceneStack.ts",
+        "engine/scenes/BrewScene.ts",
         "engine/scenes/DialogScene.ts",
         "engine/scenes/GameplayScene.ts",
         "engine/scenes/MenuScene.ts",
         "engine/scenes/ShopScene.ts",
-        "main.ts",
-        "engine/entities/CoffeeBag.ts"
+        "main.ts"
     ],
     "testFiles": [
         "test.ts"

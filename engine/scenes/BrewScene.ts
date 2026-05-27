@@ -3,16 +3,32 @@ namespace Engine.Scenes {
         private onComplete: (recipe: Engine.Entities.DrinkRecipe) => void;
         private recipe: Engine.Entities.DrinkRecipe;
         private cursorIndex: number;
-        // Layout: 
-        //  Linha 0: [Grão Man.] [Grão Col.]
-        //  Linha 1: [Espresso]  [V60]
-        //  Linha 2: [Leite]     [Mel]      [SERVIR]
-        // items[6] = SERVIR
+
+        // Grid 3x2 + botão SERVIR (índice 6)
+        // [ 0:ManBag ] [ 1:ColBag  ] [ 2:Espresso ]
+        // [ 3:V60    ] [ 4:Leite   ] [ 5:Mel      ]
+        //                              [ 6:SERVIR  ]
+
+        // Posições centrais dos slots no ecrã 160x120
+        // Painel esq. para a grelha: x 10..90
+        // Painel dir. para a receita: x 96..158
+        private readonly SLOTS: {x: number, y: number, label: string, icon: Image}[] = [];
 
         constructor(onComplete: (recipe: Engine.Entities.DrinkRecipe) => void) {
             this.onComplete = onComplete;
             this.recipe = new Engine.Entities.DrinkRecipe();
             this.cursorIndex = 0;
+        }
+
+        private getSlots(): {x: number, y: number, label: string, icon: Image}[] {
+            return [
+                { x: 20, y: 44, label: "Mantiqueira",  icon: Assets.iconMantiqueira },
+                { x: 52, y: 44, label: "Colombia",     icon: Assets.iconColombia    },
+                { x: 84, y: 44, label: "Espresso",     icon: Assets.iconEspresso    },
+                { x: 20, y: 82, label: "V60",          icon: Assets.iconV60         },
+                { x: 52, y: 82, label: "Leite",        icon: Assets.iconMilk        },
+                { x: 84, y: 82, label: "Mel",          icon: Assets.iconHoney       },
+            ];
         }
 
         public enter(): void {
@@ -23,138 +39,110 @@ namespace Engine.Scenes {
         }
 
         private drawScene(): void {
-            // === FUNDO ===
-            // Parede de fundo (azul escuro lofi)
-            screen.fillRect(0, 0, screen.width, 72, 1);
-            // Balcão de madeira (escuro)
-            screen.fillRect(0, 72, screen.width, 48, 14);
-            // Tampo do balcão (linha de madeira clara)
-            screen.fillRect(0, 72, screen.width, 4, 4);
+            // --- Fundo ---
+            screen.fillRect(0, 0, screen.width, screen.height, 15);      // preto geral
 
-            // === TÍTULO ===
-            screen.fillRect(0, 0, screen.width, 12, 15);
-            screen.print("BANCADA DE PREPARO", 26, 3, 1, image.font5);
+            // Painel esquerdo (bancada, madeira)
+            screen.fillRect(0, 0, 104, screen.height, 11);               // azul noite
+            screen.fillRect(0, 0, 104, 16, 15);                          // header preto
 
-            // === STATUS DA RECEITA (lado direito, acima) ===
-            let recipeY = 15;
-            screen.print("RECEITA:", 102, recipeY, 12, image.font5);
+            // Separador vertical
+            screen.fillRect(104, 0, 2, screen.height, 12);
+
+            // --- Cabeçalho ---
+            screen.print("PREPARO", 24, 5, 6, image.font5);
+
+            // --- Slots dos itens ---
+            let slots = this.getSlots();
+            for (let i = 0; i < slots.length; i++) {
+                let s = slots[i];
+                let sel = this.cursorIndex === i;
+                let cx = s.x - 8;
+                let cy = s.y - 8;
+
+                // Fundo do card
+                screen.fillRect(cx - 1, cy - 1, 18, 18, sel ? 6 : 13);
+                // Ícone real 16x16
+                screen.drawTransparentImage(s.icon, cx, cy);
+                // Borda seleção
+                if (sel) {
+                    screen.drawRect(cx - 2, cy - 2, 20, 20, 5);
+                }
+                // Label curta abaixo
+                let shortLabel = s.label.substr(0, 3);
+                screen.print(shortLabel, cx + 2, cy + 18, sel ? 5 : 12, image.font5);
+            }
+
+            // --- Botão SERVIR ---
+            let servSel = this.cursorIndex === 6;
+            screen.fillRect(57, 103, 42, 14, servSel ? 5 : 13);
+            screen.drawRect(57, 103, 42, 14, servSel ? 15 : 12);
+            screen.print("SERVIR", 61, 107, servSel ? 15 : 12, image.font5);
+
+            // --- Painel Direito: Receita em construção ---
+            screen.print("RECEITA", 108, 5, 12, image.font5);
+            screen.drawLine(106, 13, 158, 13, 13);
+
+            let ry = 18;
+            // Grão
             if (this.recipe.bean !== Engine.Entities.BeanType.None) {
-                let bName = this.recipe.bean === Engine.Entities.BeanType.Mantiqueira ? "Mantiqueira" : "Colombia";
-                screen.print(bName, 102, recipeY + 8, 5, image.font5);
+                let bIcon = this.recipe.bean === Engine.Entities.BeanType.Mantiqueira
+                    ? Assets.iconMantiqueira : Assets.iconColombia;
+                screen.drawTransparentImage(bIcon, 108, ry);
+                let bLabel = this.recipe.bean === Engine.Entities.BeanType.Mantiqueira ? "Man." : "Col.";
+                screen.print(bLabel, 126, ry + 4, 5, image.font5);
+                ry += 22;
+            } else {
+                screen.print("? grao", 108, ry, 13, image.font5);
+                ry += 10;
             }
+
+            // Método
             if (this.recipe.method !== Engine.Entities.BrewMethod.None) {
-                let mName = "";
-                if (this.recipe.method === Engine.Entities.BrewMethod.Espresso) mName = "Espresso";
-                else if (this.recipe.method === Engine.Entities.BrewMethod.V60) mName = "V60";
-                else mName = "Capsula";
-                screen.print(mName, 102, recipeY + 16, 6, image.font5);
+                let mIcon = this.recipe.method === Engine.Entities.BrewMethod.Espresso
+                    ? Assets.iconEspresso : Assets.iconV60;
+                screen.drawTransparentImage(mIcon, 108, ry);
+                let mLabel = this.recipe.method === Engine.Entities.BrewMethod.Espresso ? "Esp." : "V60";
+                screen.print(mLabel, 126, ry + 4, 6, image.font5);
+                ry += 22;
+            } else {
+                screen.print("? metodo", 108, ry, 13, image.font5);
+                ry += 10;
             }
+
+            // Extras
             if (this.recipe.addins.indexOf(Engine.Entities.AddinType.Milk) >= 0) {
-                screen.print("+ Leite", 102, recipeY + 24, 1, image.font5);
+                screen.drawTransparentImage(Assets.iconMilk, 108, ry);
+                screen.print("+Leite", 126, ry + 4, 1, image.font5);
+                ry += 20;
             }
             if (this.recipe.addins.indexOf(Engine.Entities.AddinType.Honey) >= 0) {
-                screen.print("+ Mel", 102, recipeY + 32, 5, image.font5);
-            }
-
-            // === GRID DE ITENS ===
-            // Colunas: x=18 e x=60. Linhas: y=32, 56, 80
-            const COL0 = 18;
-            const COL1 = 60;
-            const ROW0 = 38;
-            const ROW1 = 62;
-            const ROW2 = 86;
-            const ICON = 16; // tamanho do ícone desenhado na tela (16x16)
-
-            // --- Linha 0: Grãos ---
-            this.drawIconItem(0, COL0, ROW0, 14); // Mantiqueira = marrom
-            this.drawIconItem(1, COL1, ROW0, 2);  // Colombia    = vermelho
-
-            // --- Linha 1: Máquinas ---
-            this.drawMachineItem(2, COL0, ROW1, Assets.largeEspresso);
-            this.drawMachineItem(3, COL1, ROW1, Assets.largeV60);
-
-            // --- Linha 2: Extras + Servir ---
-            this.drawMachineItem(4, COL0, ROW2, Assets.largeMilk);
-            this.drawMachineItem(5, COL1, ROW2, Assets.largeHoney);
-
-            // Botão SERVIR (índice 6) à direita
-            let isServing = this.cursorIndex === 6;
-            screen.fillRect(80, ROW2 - 10, 18, 20, isServing ? 5 : 11);
-            screen.print("OK", 84, ROW2 - 3, isServing ? 15 : 12, image.font5);
-
-            // === LEGENDA NO RODAPÉ ===
-            screen.fillRect(0, 112, screen.width, 8, 15);
-            let labels = ["Man.", "Col.", "Espresso", "V60", "Leite", "Mel", "SERVIR!"];
-            if (this.cursorIndex >= 0 && this.cursorIndex <= 6) {
-                screen.print(labels[this.cursorIndex], 2, 113, 14, image.font5);
-                screen.print("< >", 120, 113, 1, image.font5);
+                screen.drawTransparentImage(Assets.iconHoney, 108, ry);
+                screen.print("+Mel", 126, ry + 4, 5, image.font5);
             }
         }
-
-        // Ícone simples (quadrado colorido) para grãos
-        private drawIconItem(idx: number, cx: number, cy: number, color: number): void {
-            let isSelected = this.cursorIndex === idx;
-            screen.fillRect(cx - 8, cy - 8, 16, 16, color);
-            // Grão label
-            let label = idx === 0 ? "Man" : "Col";
-            screen.print(label, cx - 7, cy - 4, 15, image.font5);
-            if (isSelected) {
-                screen.drawRect(cx - 10, cy - 10, 20, 20, 5);
-            }
-        }
-
-        // Ícone de imagem grande desenhado como bloco de cor por tipo
-        private drawMachineItem(idx: number, cx: number, cy: number, img: Image): void {
-            let isSelected = this.cursorIndex === idx;
-            let sx = cx - 8;
-            let sy = cy - 8;
-            // Sem resize() disponível, desenhamos a imagem full-size
-            // mas num "viewport" de 16x16 via fillRect de fundo + ícone centralizado
-            screen.fillRect(sx, sy, 16, 16, 11); // fundo azul escuro
-            // Samplea a cor central da imagem para dar identidade visual
-            let centerColor = img.getPixel(img.width / 2, img.height / 2);
-            screen.fillRect(sx + 2, sy + 2, 12, 12, centerColor);
-            screen.drawRect(sx + 2, sy + 2, 12, 12, 12);
-            if (isSelected) {
-                screen.drawRect(sx - 2, sy - 2, 20, 20, 5);
-            }
-        }
-
-        private drawCupContents(): void {}
 
         public exit(): void {}
         public pause(): void {}
         public resume(): void {}
 
         public update(dt: number): void {
-            // Navegação em grid 2 colunas (0-5) + botão 6
+            // Navegação: grid 3 colunas (0..5) + SERVIR (6)
             if (Engine.Core.justPressed(Engine.Core.Action.Right)) {
-                if (this.cursorIndex < 5) {
-                    this.cursorIndex++;
-                } else {
-                    this.cursorIndex = 6;
-                }
+                if (this.cursorIndex < 5) this.cursorIndex++;
+                else this.cursorIndex = 6;
             }
             if (Engine.Core.justPressed(Engine.Core.Action.Left)) {
-                if (this.cursorIndex === 6) {
-                    this.cursorIndex = 5;
-                } else if (this.cursorIndex > 0) {
-                    this.cursorIndex--;
-                }
+                if (this.cursorIndex === 6) this.cursorIndex = 5;
+                else if (this.cursorIndex > 0) this.cursorIndex--;
             }
             if (Engine.Core.justPressed(Engine.Core.Action.Down)) {
-                if (this.cursorIndex < 4) {
-                    this.cursorIndex += 2;
-                } else if (this.cursorIndex < 6) {
-                    this.cursorIndex = 6;
-                }
+                if (this.cursorIndex < 3) this.cursorIndex += 3;
+                else this.cursorIndex = 6;
             }
             if (Engine.Core.justPressed(Engine.Core.Action.Up)) {
-                if (this.cursorIndex === 6) {
-                    this.cursorIndex = 5;
-                } else if (this.cursorIndex >= 2) {
-                    this.cursorIndex -= 2;
-                }
+                if (this.cursorIndex === 6) this.cursorIndex = 5;
+                else if (this.cursorIndex >= 3) this.cursorIndex -= 3;
             }
 
             if (Engine.Core.justPressed(Engine.Core.Action.Interact)) {

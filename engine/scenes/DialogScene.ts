@@ -390,6 +390,19 @@ namespace Engine.Scenes {
                         screen.print("v", 148, 110, 1, image.font5);
                     }
                 }
+
+                // Display affinity level under character name
+                if (this.customer) {
+                    let affinityStr = this.customer.getAffinityLevel();
+                    let affinityColor = 8; // neutral gray
+                    if (affinityStr === "hostile") affinityColor = 2; // red
+                    else if (affinityStr === "cold") affinityColor = 10; // cool blue
+                    else if (affinityStr === "friendly") affinityColor = 14; // warm orange
+                    else if (affinityStr === "close") affinityColor = 12; // pink
+                    else if (affinityStr === "intimate") affinityColor = 15; // bright yellow
+
+                    screen.print("(" + affinityStr + ")", 7, 80, affinityColor, image.font5);
+                }
             });
         }
 
@@ -454,7 +467,9 @@ namespace Engine.Scenes {
 
                 if (Engine.Core.justPressed(Engine.Core.Action.Interact)) {
                     let selectedChoice = currentNode.choices[this.selectedChoiceIndex];
-                    // Jump to next node specified by choice
+                    // Apply affinity change
+                    this.customer.modifyAffinity(selectedChoice.affinityDelta * 10); // 10 points per delta
+                    // Jump to next node
                     this.currentNodeIndex = selectedChoice.nextLineIndex;
                     this.targetText = this.dialogNodes[this.currentNodeIndex].text;
                     this.displayedText = "";

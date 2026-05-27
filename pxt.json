@@ -8,6 +8,7 @@
         "assets/assets.ts",
         "assets/generatedAssets.ts",
         "assets/sound.ts",
+        "assets/Portraits.ts",
         "engine/Kernel.ts",
         "engine/InputManager.ts",
         "engine/SpritePool.ts",

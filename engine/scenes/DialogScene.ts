@@ -10,6 +10,9 @@ namespace Engine.Scenes {
         private onComplete: () => void;
         private bgCache: Image;
         private renderable: scene.Renderable;
+        // Expression can change based on dialog progress
+        // -1 = no change, 0 = happy, 1 = sad, 2 = thoughtful
+        private nextExpressionIndex: number = -1;
 
         constructor(character: Engine.Entities.Character, lines: string[], onComplete: () => void) {
             this.character = character;
@@ -318,12 +321,13 @@ namespace Engine.Scenes {
                 screen.drawTransparentImage(this.bgCache, 0, 0);
 
                 // ── RETRATO (canto superior direito, sobre o fundo) ─────────
-                if (this.portrait) {
+                if (this.character) {
+                    let currentPortrait = this.character.getPortraitImage();
                     // Moldura escura atrás do retrato
                     screen.fillRect(105, 22, 52, 52, 1);
                     screen.drawRect(104, 21, 54, 54, 14);
                     screen.drawRect(103, 20, 56, 56, 0);
-                    screen.drawTransparentImage(this.portrait, 106, 23);
+                    screen.drawTransparentImage(currentPortrait, 106, 23);
                 }
 
                 // ── CAIXA DE DIÁLOGO ────────────────────────────────────────
@@ -404,6 +408,11 @@ namespace Engine.Scenes {
                     }
                 }
             }
+        }
+
+        public changeCharacterExpression(expressionIndex: number): void {
+            this.nextExpressionIndex = expressionIndex;
+            this.character.setExpression(expressionIndex);
         }
 
         public pause(): void {}

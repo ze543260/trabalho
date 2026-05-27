@@ -1,27 +1,28 @@
 namespace Engine.Scenes {
     export class DialogScene implements Scene {
         private character: Engine.Entities.Character;
-        private portrait: Image;
-        private lines: string[];
-        private currentLineIndex: number;
+        private customer: Engine.Entities.CustomerProfile;
+        private dialogNodes: Engine.Entities.DialogNode[];
+        private currentNodeIndex: number;
         private displayedText: string;
         private targetText: string;
         private ticks: number;
         private onComplete: () => void;
         private bgCache: Image;
         private renderable: scene.Renderable;
-        // Expression can change based on dialog progress
-        // -1 = no change, 0 = happy, 1 = sad, 2 = thoughtful
-        private nextExpressionIndex: number = -1;
+        private showingChoices: boolean = false;
+        private selectedChoiceIndex: number = 0;
 
-        constructor(character: Engine.Entities.Character, lines: string[], onComplete: () => void) {
-            this.character = character;
-            this.portrait = character.getPortraitImage();
-            this.lines = lines;
-            this.onComplete = onComplete;
-            this.currentLineIndex = 0;
+        constructor(customer: Engine.Entities.CustomerProfile, nodes: Engine.Entities.DialogNode[], onComplete: () => void) {
+            this.customer = customer;
+            this.character = customer.character;
+            this.dialogNodes = nodes;
+            this.currentNodeIndex = 0;
             this.displayedText = "";
-            this.targetText = lines.length > 0 ? lines[0] : "";
+            this.targetText = nodes.length > 0 ? nodes[0].text : "";
+            this.showingChoices = false;
+            this.selectedChoiceIndex = 0;
+            this.onComplete = onComplete;
             this.ticks = 0;
             this.bgCache = null;
         }
@@ -362,6 +363,26 @@ namespace Engine.Scenes {
                     screen.print(currentLineStr, 7, yOff, 5, image.font5);
                 }
 
+                // ── CHOICE BUTTONS (if showing choices) ──────────────────
+                if (this.showingChoices && this.currentNodeIndex < this.dialogNodes.length) {
+                    let currentNode = this.dialogNodes[this.currentNodeIndex];
+                    let choiceCount = currentNode.choices.length;
+                    let startY = 92;
+
+                    for (let i = 0; i < choiceCount; i++) {
+                        let isSelected = (i === this.selectedChoiceIndex);
+                        let bgColor = isSelected ? 14 : 2;
+                        let textColor = isSelected ? 1 : 5;
+
+                        // Draw choice box
+                        screen.fillRect(5, startY + i * 10, 150, 9, bgColor);
+                        screen.drawRect(4, startY + i * 10 - 1, 152, 11, 0);
+
+                        // Draw choice text
+                        screen.print(currentNode.choices[i].text, 7, startY + i * 10, textColor, image.font5);
+                    }
+                }
+
                 // ── CURSOR PISCANTE ─────────────────────────────────────────
                 if (this.displayedText.length === this.targetText.length) {
                     if (Math.floor(game.runtime() / 400) % 2 === 0) {
@@ -380,32 +401,66 @@ namespace Engine.Scenes {
 
         public update(dt: number): void {
             this.ticks++;
-            if (this.displayedText.length < this.targetText.length) {
-                this.displayedText = this.targetText.substr(0, this.displayedText.length + 1);
-                if (this.displayedText.length % 3 === 0) {
-                    let lastChar = this.displayedText.charAt(this.displayedText.length - 1);
-                    if (lastChar !== " ") {
-                        // Use character-specific tone frequency
-                        let freq = this.character.getToneFrequency();
-                        music.playTone(freq, 10);
-                    }
-                }
-            }
 
-            if (Engine.Core.justPressed(Engine.Core.Action.Interact)) {
+            if (!this.showingChoices) {
+                // Typewriter mode
                 if (this.displayedText.length < this.targetText.length) {
-                    this.displayedText = this.targetText;
-                } else {
-                    this.currentLineIndex++;
-                    if (this.currentLineIndex < this.lines.length) {
-                        this.targetText = this.lines[this.currentLineIndex];
-                        this.displayedText = "";
-                    } else {
-                        Engine.Scenes.SceneStack.pop();
-                        if (this.onComplete) {
-                            this.onComplete();
+                    this.displayedText = this.targetText.substr(0, this.displayedText.length + 1);
+                    if (this.displayedText.length % 3 === 0) {
+                        let lastChar = this.displayedText.charAt(this.displayedText.length - 1);
+                        if (lastChar !== " ") {
+                            let freq = this.character.getToneFrequency();
+                            music.playTone(freq, 10);
                         }
                     }
+                }
+
+                if (Engine.Core.justPressed(Engine.Core.Action.Interact)) {
+                    if (this.displayedText.length < this.targetText.length) {
+                        this.displayedText = this.targetText;
+                    } else {
+                        let currentNode = this.dialogNodes[this.currentNodeIndex];
+                        if (currentNode.choices.length > 0) {
+                            // Show choice buttons
+                            this.showingChoices = true;
+                            this.selectedChoiceIndex = 0;
+                        } else {
+                            // No choices, advance to next node
+                            this.currentNodeIndex++;
+                            if (this.currentNodeIndex < this.dialogNodes.length) {
+                                let nextNode = this.dialogNodes[this.currentNodeIndex];
+                                this.targetText = nextNode.text;
+                                this.displayedText = "";
+                                this.character.setExpression(nextNode.expression);
+                            } else {
+                                Engine.Scenes.SceneStack.pop();
+                                if (this.onComplete) {
+                                    this.onComplete();
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Choice selection mode
+                let currentNode = this.dialogNodes[this.currentNodeIndex];
+
+                if (Engine.Core.justPressed(Engine.Core.Action.Up)) {
+                    this.selectedChoiceIndex = (this.selectedChoiceIndex - 1 + currentNode.choices.length) % currentNode.choices.length;
+                }
+                if (Engine.Core.justPressed(Engine.Core.Action.Down)) {
+                    this.selectedChoiceIndex = (this.selectedChoiceIndex + 1) % currentNode.choices.length;
+                }
+
+                if (Engine.Core.justPressed(Engine.Core.Action.Interact)) {
+                    let selectedChoice = currentNode.choices[this.selectedChoiceIndex];
+                    // Jump to next node specified by choice
+                    this.currentNodeIndex = selectedChoice.nextLineIndex;
+                    this.targetText = this.dialogNodes[this.currentNodeIndex].text;
+                    this.displayedText = "";
+                    this.character.setExpression(this.dialogNodes[this.currentNodeIndex].expression);
+                    this.showingChoices = false;
+                    this.selectedChoiceIndex = 0;
                 }
             }
         }

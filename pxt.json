@@ -22,6 +22,7 @@
         "engine/fx/ParticleEmitter.ts",
         "engine/entities/Customer.ts",
         "engine/entities/Character.ts",
+        "engine/entities/DialogChoice.ts",
         "engine/scenes/Scene.ts",
         "engine/scenes/SceneStack.ts",
         "engine/scenes/BrewScene.ts",

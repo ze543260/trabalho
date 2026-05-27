@@ -176,6 +176,52 @@ namespace Assets {
         . . . . . . . . . . . . . . . . . . . . . . . .
     `;
 
+    export const largeMantiqueira = img`
+        . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . f f f f f f f f . . . . . . . . . . . .
+        . . . . . . . . . . f f e e e e e e e e f f . . . . . . . . . .
+        . . . . . . . . f f e e 4 4 4 4 4 4 4 4 e e f f . . . . . . . .
+        . . . . . . . . f e e 4 4 4 4 4 4 4 4 4 4 e e f . . . . . . . .
+        . . . . . . . . f a a a a a a a a a a a a a a f . . . . . . . .
+        . . . . . . . f 4 e e e e e e e e e e e e e e 4 f . . . . . . .
+        . . . . . . f 4 e e e e e e e e e e e e e e e e 4 f . . . . . .
+        . . . . . . f 4 e e b b b b b b b b b b b b e e 4 f . . . . . .
+        . . . . . f 4 e e b b b b b b b b b b b b b b e e 4 f . . . . .
+        . . . . . f 4 e e b b c c c c c c c c c c b b e e 4 f . . . . .
+        . . . . . f 4 e e b b c c 7 7 7 7 7 7 c c b b e e 4 f . . . . .
+        . . . . . f 4 e e b b c c 7 7 7 7 7 7 c c b b e e 4 f . . . . .
+        . . . . . f 4 e e b b c c c c c c c c c c b b e e 4 f . . . . .
+        . . . . . f 4 e e b b b b b b b b b b b b b b e e 4 f . . . . .
+        . . . . . f 4 e e b b b b b b b b b b b b b b e e 4 f . . . . .
+        . . . . . f 4 e e e e e e e e e e e e e e e e e e 4 f . . . . .
+        . . . . . f 4 4 e e e e e e e e e e e e e e e e 4 4 f . . . . .
+        . . . . . . f f 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 f f . . . . . .
+        . . . . . . . . f f f f f f f f f f f f f f f f . . . . . . . .
+    `;
+
+    export const largeColombia = img`
+        . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . f f f f f f f f . . . . . . . . . . . .
+        . . . . . . . . . . f f e e e e e e e e f f . . . . . . . . . .
+        . . . . . . . . f f e e 4 4 4 4 4 4 4 4 e e f f . . . . . . . .
+        . . . . . . . . f e e 4 4 4 4 4 4 4 4 4 4 e e f . . . . . . . .
+        . . . . . . . . f a a a a a a a a a a a a a a f . . . . . . . .
+        . . . . . . . f 4 e e e e e e e e e e e e e e 4 f . . . . . . .
+        . . . . . . f 4 e e e e e e e e e e e e e e e e 4 f . . . . . .
+        . . . . . . f 4 e e 2 2 2 2 2 2 2 2 2 2 2 2 e e 4 f . . . . . .
+        . . . . . f 4 e e 2 2 2 2 2 2 2 2 2 2 2 2 2 2 e e 4 f . . . . .
+        . . . . . f 4 e e 2 2 3 3 3 3 3 3 3 3 3 3 2 2 e e 4 f . . . . .
+        . . . . . f 4 e e 2 2 3 3 7 7 7 7 7 7 3 3 2 2 e e 4 f . . . . .
+        . . . . . f 4 e e 2 2 3 3 7 7 7 7 7 7 3 3 2 2 e e 4 f . . . . .
+        . . . . . f 4 e e 2 2 3 3 3 3 3 3 3 3 3 3 2 2 e e 4 f . . . . .
+        . . . . . f 4 e e 2 2 2 2 2 2 2 2 2 2 2 2 2 2 e e 4 f . . . . .
+        . . . . . f 4 e e 2 2 2 2 2 2 2 2 2 2 2 2 2 2 e e 4 f . . . . .
+        . . . . . f 4 e e e e e e e e e e e e e e e e e e 4 f . . . . .
+        . . . . . f 4 4 e e e e e e e e e e e e e e e e 4 4 f . . . . .
+        . . . . . . f f 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 f f . . . . . .
+        . . . . . . . . f f f f f f f f f f f f f f f f . . . . . . . .
+    `;
+
     export const largeCup = img`
         . . . . . . . . . . . . . . . . . . . . . . . .
         . . . . . . . . . . . . . . . . . . . . . . . .

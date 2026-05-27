@@ -22,6 +22,7 @@ namespace Engine.Scenes {
         // Day/night cycle with dynamic lighting
         private timeOfDay: number; // 0-1, where 0=afternoon (5pm), 0.5=evening (8pm), 1=night (11pm)
         private ambientColor: number; // palette index for ambient lighting
+        private weatherSystem: Engine.Graphics.WeatherSystem;
 
         constructor() {
             this.state = CafeState.Waiting;
@@ -33,6 +34,13 @@ namespace Engine.Scenes {
             // Time starts at afternoon (0.0)
             this.timeOfDay = 0;
             this.ambientColor = 14; // warm orange
+
+            // Random weather for atmosphere
+            let weatherRoll = Math.random();
+            let weather = weatherRoll < 0.6 ? Engine.Graphics.WeatherType.Clear :
+                          weatherRoll < 0.85 ? Engine.Graphics.WeatherType.Rainy :
+                          Engine.Graphics.WeatherType.Snowy;
+            this.weatherSystem = new Engine.Graphics.WeatherSystem(weather);
 
             this.bg = image.create(160, 120);
             this.drawLofiBackground();
@@ -77,6 +85,7 @@ namespace Engine.Scenes {
 
         public update(dt: number): void {
             this.advanceTime(dt);
+            this.weatherSystem.update(dt);
 
             if (this.state === CafeState.Waiting) {
                 this.dayTimerMs -= dt;
@@ -206,6 +215,9 @@ namespace Engine.Scenes {
         public render(screen: Image): void {
             // Fundo escuro Lofi
             screen.drawTransparentImage(this.bg, 0, 0);
+
+            // Weather effects
+            this.weatherSystem.draw(screen);
 
             // Status no canto superior (Pequeno e minimalista)
             screen.print(`Dia ${Engine.Core.TycoonState.dayNumber}`, 2, 2, 1, image.font5);

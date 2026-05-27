@@ -12,6 +12,7 @@
         "engine/InputManager.ts",
         "engine/SpritePool.ts",
         "engine/graphics/Animator.ts",
+        "engine/graphics/WeatherSystem.ts",
         "engine/ui/UIElement.ts",
         "engine/ui/UIManager.ts",
         "engine/ui/Window.ts",

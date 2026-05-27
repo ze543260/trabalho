@@ -1,7 +1,6 @@
 namespace Engine.Scenes {
     // Enum para o estado da Cena Principal (Ciclo da Loja)
     enum CafeState {
-        SelectCustomer,
         Waiting,
         DialogOrder,
         Brewing,
@@ -26,19 +25,16 @@ namespace Engine.Scenes {
         private weatherSystem: Engine.Graphics.WeatherSystem;
         private musicManager: Engine.Audio.MusicManager;
 
-        // Customer selection
+        // Customer state
         private currentCustomerProfile: Engine.Entities.CustomerProfile | null;
-        private selectedCustomerId: number;
 
         constructor() {
-            this.state = CafeState.SelectCustomer;
+            this.state = CafeState.Waiting;
             this.dayTimerMs = 0;
             this.customersServedToday = 0;
             // A cada dia, 1 cliente a mais
             this.maxCustomersPerDay = 2 + Engine.Core.TycoonState.dayNumber;
 
-            // Customer selection initialization
-            this.selectedCustomerId = 0;
             this.currentCustomerProfile = null;
 
             // Time starts at afternoon (0.0)
@@ -91,7 +87,6 @@ namespace Engine.Scenes {
 
         public init(): void {
             this.state = CafeState.Waiting;
-            this.selectedCustomerId = 0;
             this.currentCustomerProfile = null;
             this.dayTimerMs = 2000; // Espera 2 segundos antes do primeiro cliente
             game.splash("Dia " + Engine.Core.TycoonState.dayNumber, "Preparado!");
@@ -102,23 +97,7 @@ namespace Engine.Scenes {
             this.weatherSystem.update(dt);
             this.musicManager.update(dt);
 
-            if (this.state === CafeState.SelectCustomer) {
-                let db = Engine.Persistence.CustomerDatabase.getInstance();
-                let customers = db.getAllCustomers();
-
-                if (Engine.Core.justPressed(Engine.Core.Action.Up)) {
-                    this.selectedCustomerId = (this.selectedCustomerId - 1 + customers.length) % customers.length;
-                }
-                if (Engine.Core.justPressed(Engine.Core.Action.Down)) {
-                    this.selectedCustomerId = (this.selectedCustomerId + 1) % customers.length;
-                }
-
-                if (Engine.Core.justPressed(Engine.Core.Action.Interact)) {
-                    this.currentCustomerProfile = db.getCustomer(this.selectedCustomerId);
-                    this.state = CafeState.DialogOrder;
-                    // Next phase: transition to DialogScene
-                }
-            } else if (this.state === CafeState.DialogOrder) {
+            if (this.state === CafeState.DialogOrder) {
                 // Create dialog nodes for customer
                 let nodes = this.generateDialogNodesForCustomer(this.currentCustomerProfile);
                 let dialogScene = new Engine.Scenes.DialogScene(this.currentCustomerProfile, nodes, () => {
@@ -311,34 +290,22 @@ namespace Engine.Scenes {
         public resume(): void {}
 
         public render(screen: Image): void {
-            if (this.state === CafeState.SelectCustomer) {
-                let db = Engine.Persistence.CustomerDatabase.getInstance();
-                let customers = db.getAllCustomers();
+            // Fundo escuro Lofi
+            screen.drawTransparentImage(this.bg, 0, 0);
 
-                screen.fillRect(0, 0, 160, 120, 1);
-                screen.print("Proximo cliente:", 10, 10, 5, image.font5);
+            // Weather effects
+            this.weatherSystem.draw(screen);
 
-                for (let i = 0; i < customers.length; i++) {
-                    let c = customers[i];
-                    let isSelected = (i === this.selectedCustomerId);
-                    let bgColor = isSelected ? 14 : 1;
-                    screen.fillRect(20, 30 + i * 15, 120, 13, bgColor);
-                    screen.drawRect(20, 30 + i * 15, 120, 13, 0);
-                    screen.print(c.character.name, 25, 33 + i * 15, 0, image.font5);
-                }
+            // Status no canto superior (Pequeno e minimalista)
+            screen.print(`Dia ${Engine.Core.TycoonState.dayNumber}`, 2, 2, 1, image.font5);
+            screen.print(`Dinheiro: $${Engine.Core.TycoonState.money}`, 2, 10, 5, image.font5);
+            screen.print(`Atendidos: ${this.customersServedToday}/${this.maxCustomersPerDay}`, 2, 18, 9, image.font5);
 
-                screen.print("A=select", 10, 105, 8, image.font5);
-            } else {
-                // Fundo escuro Lofi
-                screen.drawTransparentImage(this.bg, 0, 0);
-
-                // Weather effects
-                this.weatherSystem.draw(screen);
-
-                // Status no canto superior (Pequeno e minimalista)
-                screen.print(`Dia ${Engine.Core.TycoonState.dayNumber}`, 2, 2, 1, image.font5);
-                screen.print(`Dinheiro: $${Engine.Core.TycoonState.money}`, 2, 10, 5, image.font5);
-                screen.print(`Atendidos: ${this.customersServedToday}/${this.maxCustomersPerDay}`, 2, 18, 9, image.font5);
+            if (this.state === CafeState.Waiting) {
+                // Subtle waiting text
+                let waitText = "Aguardando cliente...";
+                let w = waitText.length * 4;
+                screen.print(waitText, 80 - w/2, 60, 5, image.font5);
             }
         }
 

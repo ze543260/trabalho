@@ -15,7 +15,9 @@ namespace Engine.Persistence {
             };
 
             // Serialize customers
-            for (let c of db.getAllCustomers()) {
+            let customersList = db.getAllCustomers();
+            for (let i = 0; i < customersList.length; i++) {
+                let c = customersList[i];
                 gameState.customers.push({
                     id: c.id,
                     affinity: c.affinity,
@@ -24,7 +26,9 @@ namespace Engine.Persistence {
             }
 
             // Serialize unlocks
-            for (let u of unlocks.getUnlockedIngredients()) {
+            let unlockedList = unlocks.getUnlockedIngredients();
+            for (let i = 0; i < unlockedList.length; i++) {
+                let u = unlockedList[i];
                 gameState.ingredients.push({
                     name: u.name,
                     customerId: u.unlockedByCustomerId
@@ -49,7 +53,9 @@ namespace Engine.Persistence {
 
                 // Restore customers
                 let db = Engine.Persistence.CustomerDatabase.getInstance();
-                for (let cData of gameState.customers) {
+                let customerDataList = gameState.customers;
+                for (let i = 0; i < customerDataList.length; i++) {
+                    let cData = customerDataList[i];
                     let customer = db.getCustomer(cData.id);
                     if (customer) {
                         customer.affinity = cData.affinity;
@@ -59,7 +65,9 @@ namespace Engine.Persistence {
 
                 // Restore unlocks
                 let unlocks = Engine.Persistence.IngredientUnlocks.getInstance();
-                for (let uData of gameState.ingredients) {
+                let ingredientDataList = gameState.ingredients;
+                for (let i = 0; i < ingredientDataList.length; i++) {
+                    let uData = ingredientDataList[i];
                     unlocks.unlockIngredient(uData.name, uData.customerId, 0);
                 }
 

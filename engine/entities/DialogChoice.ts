@@ -16,7 +16,7 @@ namespace Engine.Entities {
         public expression: number; // 0=happy, 1=sad, 2=thoughtful
         public choices: DialogChoice[]; // If empty, just shows text
 
-        constructor(text: string, expression: number = 0, choices: DialogChoice[] = []) {
+        constructor(text: string, expression: number, choices: DialogChoice[]) {
             this.text = text;
             this.expression = expression;
             this.choices = choices;

@@ -162,7 +162,8 @@ namespace Engine.Scenes {
                 ),
                 new Engine.Entities.DialogNode(
                     "Obrigado!",
-                    0
+                    0,
+                    []
                 )
             ];
         }
@@ -221,8 +222,9 @@ namespace Engine.Scenes {
 
             // Build dialog nodes from the dialog lines
             let nodes: Engine.Entities.DialogNode[] = [];
-            for (let line of dialogLines) {
-                nodes.push(new Engine.Entities.DialogNode(line, 0));
+            for (let i = 0; i < dialogLines.length; i++) {
+                let line = dialogLines[i];
+                nodes.push(new Engine.Entities.DialogNode(line, 0, []));
             }
 
             // Resolve a customer profile for this spawned customer (charIndex 0..2)
@@ -266,8 +268,9 @@ namespace Engine.Scenes {
 
             // Build dialog nodes from the result lines
             let nodes: Engine.Entities.DialogNode[] = [];
-            for (let line of dialogLines) {
-                nodes.push(new Engine.Entities.DialogNode(line, 0));
+            for (let i = 0; i < dialogLines.length; i++) {
+                let line = dialogLines[i];
+                nodes.push(new Engine.Entities.DialogNode(line, 0, []));
             }
 
             // Reuse the currently active customer profile, falling back to the first

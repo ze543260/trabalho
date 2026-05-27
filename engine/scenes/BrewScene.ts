@@ -33,6 +33,9 @@ namespace Engine.Scenes {
         }
 
         public enter(): void {
+            // Fade music when brewing starts
+            music.stopAllSounds();
+
             game.onPaint(() => {
                 if (SceneStack.top() !== (this as any)) return;
                 this.drawScene();
@@ -194,7 +197,9 @@ namespace Engine.Scenes {
             }
         }
 
-        public exit(): void {}
+        public exit(): void {
+            // Music will resume when returning to CafeScene
+        }
         public pause(): void {}
         public resume(): void {}
 

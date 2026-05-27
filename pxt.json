@@ -11,6 +11,7 @@
         "engine/Kernel.ts",
         "engine/InputManager.ts",
         "engine/SpritePool.ts",
+        "engine/audio/MusicManager.ts",
         "engine/graphics/Animator.ts",
         "engine/graphics/WeatherSystem.ts",
         "engine/ui/UIElement.ts",

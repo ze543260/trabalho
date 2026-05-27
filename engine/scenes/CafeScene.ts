@@ -23,6 +23,7 @@ namespace Engine.Scenes {
         private timeOfDay: number; // 0-1, where 0=afternoon (5pm), 0.5=evening (8pm), 1=night (11pm)
         private ambientColor: number; // palette index for ambient lighting
         private weatherSystem: Engine.Graphics.WeatherSystem;
+        private musicManager: Engine.Audio.MusicManager;
 
         constructor() {
             this.state = CafeState.Waiting;
@@ -41,6 +42,8 @@ namespace Engine.Scenes {
                           weatherRoll < 0.85 ? Engine.Graphics.WeatherType.Rainy :
                           Engine.Graphics.WeatherType.Snowy;
             this.weatherSystem = new Engine.Graphics.WeatherSystem(weather);
+            this.musicManager = new Engine.Audio.MusicManager();
+            this.musicManager.startCafeLoop();
 
             this.bg = image.create(160, 120);
             this.drawLofiBackground();
@@ -86,6 +89,7 @@ namespace Engine.Scenes {
         public update(dt: number): void {
             this.advanceTime(dt);
             this.weatherSystem.update(dt);
+            this.musicManager.update(dt);
 
             if (this.state === CafeState.Waiting) {
                 this.dayTimerMs -= dt;
@@ -207,7 +211,9 @@ namespace Engine.Scenes {
             ));
         }
 
-        public enter(): void {}
+        public enter(): void {
+            this.musicManager.startCafeLoop();
+        }
         public exit(): void {}
         public pause(): void {}
         public resume(): void {}
